@@ -1,0 +1,26 @@
+[
+    {
+        "pk": 1,
+        "model": "pulse.dummyblip",
+        "fields": {
+            "timestamp": "2011-12-15 15:46:28",
+            "message": "Started working on this janx!"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "pulse.dummyblip",
+        "fields": {
+            "timestamp": "2011-12-14 15:46:57",
+            "message": "Brainstormed some ideas for this janx!"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "pulse.dummyblip",
+        "fields": {
+            "timestamp": "2011-12-14 15:46:43",
+            "message": "Thought about this janx!"
+        }
+    }
+]
