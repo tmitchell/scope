@@ -1,11 +1,12 @@
 from django.db import models
 
+from polymorphic import PolymorphicModel
 
-class Blip(models.Model):
+
+class Blip(PolymorphicModel):
     timestamp = models.DateTimeField()
     class Meta:
         ordering = ['-timestamp']
-        abstract = True
 
     def __unicode__(self):
         raise NotImplementedError()
