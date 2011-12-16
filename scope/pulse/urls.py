@@ -1,6 +1,10 @@
 from django.conf.urls.defaults import patterns, include, url
 from django.views.generic.simple import direct_to_template
 
+from pulse.views import TimelineView
+
+
 urlpatterns = patterns('',
     url(r'^$', direct_to_template, {'template': 'index.html'}),
+    url(r'^timeline$', TimelineView.as_view())
 )
