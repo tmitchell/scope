@@ -1,4 +1,5 @@
 import datetime
+import logging
 import time
 
 import feedparser
@@ -7,10 +8,11 @@ from django.db import models
 from polymorphic import PolymorphicModel
 
 
-# Todo: Blip detail URL
+logger = logging.getLogger(__name__)
 
 
 class Blip(PolymorphicModel):
+    # Todo: Blip detail URL
     timestamp = models.DateTimeField()
     class Meta:
         ordering = ['-timestamp']
@@ -56,10 +58,14 @@ class RSSProvider(Provider):
 
     def update(self):
         content = feedparser.parse(self.url)
+        new = 0
         for entry in content['entries']:
             timestamp = datetime.datetime.fromtimestamp(time.mktime(entry.updated_parsed))
             if self.last_update is None or timestamp > self.last_update:
                 self.blip_model.objects.create(message=entry.title, timestamp=timestamp)
+                new += 1
+
+        logger.debug("Updated %d/%d feed items", new, len(content['entries']))
 
         self.last_update = datetime.datetime.now()
         self.save()

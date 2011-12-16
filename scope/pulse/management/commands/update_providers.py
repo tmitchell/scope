@@ -1,9 +1,11 @@
-import glob
-import os
+import logging
 
 from django.core.management.base import BaseCommand, CommandError
 
 from pulse.models import Provider
+
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -12,6 +14,5 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for p in Provider.objects.all():
-            print "Updating %s %s..." % (p.__class__.__name__, p),
+            logger.debug("Updating %s %s..." % (p.__class__.__name__, p))
             p.update()
-            print "done"
