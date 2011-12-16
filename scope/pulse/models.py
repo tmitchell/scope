@@ -1,8 +1,6 @@
 import datetime
 import time
-import email
 
-import pytz
 import feedparser
 from django.db import models
 
@@ -39,7 +37,7 @@ class Provider(PolymorphicModel):
 
 class RSSProvider(Provider):
     url = models.URLField()
-    name = models.CharField(editable=False, max_length=255)
+    name = models.CharField(max_length=255, blank=True)
     last_update = models.DateTimeField(null=True, editable=False)
     blip_model = DummyBlip
 
@@ -59,9 +57,6 @@ class RSSProvider(Provider):
     def update(self):
         content = feedparser.parse(self.url)
         for entry in content['entries']:
-#            utc_timestamp = email.Utils.mktime_tz(email.Utils.parsedate_tz(entry.updated))
-#            timestamp = datetime.datetime.fromtimestamp(utc_timestamp, pytz.utc)
-#            timestamp = timestamp.replace(tzinfo=None)  # remove timestamp info so we can compare them
             timestamp = datetime.datetime.fromtimestamp(time.mktime(entry.updated_parsed))
             if self.last_update is None or timestamp > self.last_update:
                 self.blip_model.objects.create(message=entry.title, timestamp=timestamp)
