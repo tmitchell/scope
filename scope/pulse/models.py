@@ -29,7 +29,7 @@ class DummyBlip(Blip):
 
 
 class Provider(PolymorphicModel):
-    update_frequency = models.IntegerField()    # minutes       # TODO: use this
+    update_frequency = models.IntegerField(verbose_name='Update Rate (mins)')
     blip_model = None
 
     def update(self):
@@ -40,7 +40,7 @@ class Provider(PolymorphicModel):
 class RSSProvider(Provider):
     url = models.URLField()
     name = models.CharField(max_length=255, blank=True)
-    last_update = models.DateTimeField(null=True, editable=False)
+    last_update = models.DateTimeField(editable=False, default=datetime.datetime(year=1900, month=1, day=1))
     blip_model = DummyBlip
 
     def __unicode__(self):
@@ -53,15 +53,16 @@ class RSSProvider(Provider):
 
         super(RSSProvider, self).save(*args, **kwargs)
 
-        if not self.last_update:
-            self.update()
-
     def update(self):
+        if (datetime.datetime.now() - self.last_update) < datetime.timedelta(minutes=self.update_frequency):
+            logger.debug("Skipping update because we updated it recently")
+            return
+
         content = feedparser.parse(self.url)
         new = 0
         for entry in content['entries']:
             timestamp = datetime.datetime.fromtimestamp(time.mktime(entry.updated_parsed))
-            if self.last_update is None or timestamp > self.last_update:
+            if timestamp > self.last_update:
                 self.blip_model.objects.create(message=entry.title, timestamp=timestamp)
                 new += 1
 

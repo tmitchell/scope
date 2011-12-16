@@ -21,7 +21,7 @@
         "fields": {
             "url": "https://teamseas.com/component/option,com_kunena/Itemid,77/func,fb_rss/no_html,1/",
             "name": "SEAS - System Effectiveness Analysis Simulation - Forum",
-            "last_update": null
+            "last_update": "1900-01-01 00:00:00"
         }
     },
     {
@@ -30,7 +30,7 @@
         "fields": {
             "url": "http://apollo.corp.exoanalytic.com:8085/rss/createAllBuildsRssFeed.action?feedType=rssAll",
             "name": "Bamboo build results feed for all builds",
-            "last_update": null
+            "last_update": "1900-01-01 00:00:00"
         }
     }
 ]
