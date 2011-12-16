@@ -1,17 +1,36 @@
 [
     {
         "pk": 1,
-        "model": "pulse.blip",
+        "model": "pulse.provider",
         "fields": {
-            "timestamp": "2011-12-15 16:15:17",
-            "polymorphic_ctype": 9
+            "update_frequency": 1440,
+            "polymorphic_ctype": 11
+        }
+    },
+    {
+        "pk": 2,
+        "model": "pulse.provider",
+        "fields": {
+            "update_frequency": 1440,
+            "polymorphic_ctype": 11
         }
     },
     {
         "pk": 1,
-        "model": "pulse.dummyblip",
+        "model": "pulse.rssprovider",
         "fields": {
-            "message": "Playing with polymorphism"
+            "url": "https://teamseas.com/component/option,com_kunena/Itemid,77/func,fb_rss/no_html,1/",
+            "name": "SEAS - System Effectiveness Analysis Simulation - Forum",
+            "last_update": null
+        }
+    },
+    {
+        "pk": 2,
+        "model": "pulse.rssprovider",
+        "fields": {
+            "url": "http://apollo.corp.exoanalytic.com:8085/rss/createAllBuildsRssFeed.action?feedType=rssAll",
+            "name": "Bamboo build results feed for all builds",
+            "last_update": null
         }
     }
 ]
