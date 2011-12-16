@@ -26,3 +26,37 @@ DEBUG_TOOLBAR_CONFIG = {
 INTERNAL_IPS = (
     '127.0.0.1',
 )
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': { 'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s' },
+        'simple': { 'format': '%(levelname)s %(message)s' },
+    },
+    'filters': { },
+    'handlers': {
+        'null': {
+            'level':'DEBUG',
+            'class':'django.utils.log.NullHandler',
+        },
+        'project':{
+            'level':'DEBUG',
+            'class':'logging.FileHandler',
+            'formatter': 'verbose',
+            'filename': os.path.join(SITE_ROOT, 'logs', 'scope.log'),
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers':['null'],
+            'propagate': False,
+            'level':'DEBUG'
+        },
+        '': {
+            'handlers': ['project'],
+            'propagate': True,
+            'level': 'DEBUG'
+        },
+    }
+}

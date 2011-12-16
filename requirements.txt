@@ -4,6 +4,8 @@ South==0.7.3
 psycopg2==2.4.3
 wsgiref==0.1.2
 django-polymorphic==0.2
+feedparser==5.1
+pytz==2011n
 
 # Development
 django-debug-toolbar==0.8.5

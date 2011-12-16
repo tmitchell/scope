@@ -1,8 +1,9 @@
 from django.contrib import admin
 
-from pulse.models import DummyBlip
+from pulse.models import DummyBlip, RSSProvider
 
+# Blips
+admin.site.register(DummyBlip)
 
-class BlipAdmin(admin.ModelAdmin):
-    pass
-admin.site.register(DummyBlip, BlipAdmin)
+# Providers
+admin.site.register(RSSProvider)
