@@ -2,19 +2,22 @@
 
 {% block page-title %}Timeline{% endblock %}
 {% block page-content %}
+  <div class="clearfix">
     {% for blipset in filter %}
         <p>
           <strong>{{ blipset.timestamp }}</strong><br />
           <a href="{{ blipset.get_absolute_url }}">{{ blipset }}</a>
         </p>
     {% endfor %}
-
+  </div>
 {% endblock %}
         
 {% block side-title %}Filter{% endblock %}
 {% block side-content %}
-    <form action="" method="get">
-        {{ filter.form.as_p }}
+  <div class="clearfix">
+    <form action="" method="get" class="form-stacked">
+        {{ filter.form }}
         <input type="submit" />
     </form>
+  </div>
 {% endblock %}
