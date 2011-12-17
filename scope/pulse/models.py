@@ -109,4 +109,14 @@ class BambooBuildsProvider(RSSProvider):
         blip = super(BambooBuildsProvider, self).create_blip(entry, blipset, timestamp)
         blip.summary = None
         return blip
-        
+
+
+class KunenaProvider(RSSProvider):
+
+    def create_blip(self, entry, blipset, timestamp):
+        blip = super(KunenaProvider, self).create_blip(entry, blipset, timestamp)
+
+        strings = entry.title.rsplit(': ')
+        blip.title = strings[2] + " posted to teamseas.com"
+        blip.summary = strings[1][:-4]
+        return blip
