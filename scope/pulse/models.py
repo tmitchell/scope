@@ -34,13 +34,6 @@ class Blip(PolymorphicModel):
         raise NotImplementedError()
 
 
-class DummyBlip(Blip):
-    message = models.TextField()
-
-    def __unicode__(self):
-        return self.message
-
-
 class Provider(PolymorphicModel):
     update_frequency = models.IntegerField(verbose_name='Update Rate (mins)')
     blip_model = None
