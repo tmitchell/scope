@@ -1,11 +1,11 @@
 from django.conf.urls.defaults import patterns, include, url
-from django.views.generic.simple import direct_to_template
+from django.views.generic import ListView, DetailView, TemplateView
 
-from pulse.views import Timeline, BlipSetDetail
+from pulse.models import BlipSet
 
 
 urlpatterns = patterns('',
-    url(r'^$', direct_to_template, {'template': 'index.html'}),
-    url(r'^timeline$', Timeline.as_view(), name='timeline'),
-    url(r'^(?P<slug>\w+)$', BlipSetDetail.as_view(), name='blipset_detail'),
+    url(r'^$', TemplateView.as_view(template_name='index.html')),
+    url(r'^timeline$', ListView.as_view(model=BlipSet), name='timeline'),
+    url(r'^(?P<slug>\w+)$', DetailView.as_view(model=BlipSet, slug_field='pk'), name='blipset_detail'),
 )
