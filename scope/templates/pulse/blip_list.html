@@ -6,7 +6,9 @@
         <p>
           <strong>{{ blip.timestamp }}</strong><br />
           <strong><a href="{{blip.source_url}}">{{ blip.title }}</a></strong></br />
-          {{ blip.summary|safe}}
+          {% if blip.summary %}
+            {{ blip.summary|safe }}
+          {% endif %}
         </p>
     {% endfor %}
 {% endblock %}

@@ -24,7 +24,7 @@ class BlipSet(models.Model):
 class Blip(PolymorphicModel):
     source_url  = models.URLField()
     title       = models.TextField()
-    summary     = models.TextField()
+    summary     = models.TextField(null=True)
     timestamp = models.DateTimeField()
     blipset = models.ForeignKey(BlipSet, related_name='blips')
     class Meta:
@@ -74,6 +74,9 @@ class RSSProvider(Provider):
                 blip = self.create_blip(entry, blipset, timestamp)
                 blip.save()
 
+        if blipset is None:
+            logger.debug("Update performed, but no new entries found.")
+            return
 
         blips = blipset.blips.all()
         blipset.summary = u"%s new RSS items fetched from %s" % (blips.count(), self.name)
@@ -88,6 +91,7 @@ class RSSProvider(Provider):
     def create_blip(self, entry, blipset, timestamp):
         blip = Blip()
         blip.title=entry.title
+        blip.source_url = entry.link
         blip.timestamp=timestamp
         blip.blipset=blipset
         return blip
@@ -96,8 +100,13 @@ class FlickrProvider(RSSProvider):
 
     def create_blip(self, entry, blipset, timestamp):
         blip = super(FlickrProvider, self).create_blip(entry, blipset, timestamp)
-        blip.source_url = entry.link
         blip.summary = entry.description
         return blip
 
-    
+class BambooBuildsProvider(RSSProvider):
+
+    def create_blip(self, entry, blipset, timestamp):
+        blip = super(BambooBuildsProvider, self).create_blip(entry, blipset, timestamp)
+        blip.summary = None
+        return blip
+        
