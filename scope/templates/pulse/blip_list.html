@@ -5,7 +5,8 @@
     {% for blip in object_list %}
         <p>
           <strong>{{ blip.timestamp }}</strong><br />
-          {{ blip }}
+          <strong><a href="{{blip.source_url}}">{{ blip.title }}</a></strong></br />
+          {{ blip.summary|safe}}
         </p>
     {% endfor %}
 {% endblock %}
