@@ -14,7 +14,7 @@ class BlipSetFilterSet(django_filters.FilterSet):
 
 
 class Timeline(View, TemplateResponseMixin):
-    template_name = 'pulse/blipset_list.html'
+    template_name = 'pulse/timeline.html'
 
     def get(self, request, *args, **kwargs):
         context = { 'filter' : BlipSetFilterSet(request.GET, queryset=BlipSet.objects.all()) }
