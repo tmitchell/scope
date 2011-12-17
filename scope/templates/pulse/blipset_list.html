@@ -2,19 +2,19 @@
 
 {% block page-title %}Timeline{% endblock %}
 {% block page-content %}
-    {% for blipset in object_list %}
+    {% for blipset in filter %}
         <p>
           <strong>{{ blipset.timestamp }}</strong><br />
           <a href="{{ blipset.get_absolute_url }}">{{ blipset }}</a>
         </p>
     {% endfor %}
+
 {% endblock %}
         
-{% block side-title %}Tags{% endblock %}
+{% block side-title %}Filter{% endblock %}
 {% block side-content %}
-<ul>
-    <li>Tag 1</li>
-    <li>Tag 2</li>
-    <li>Tag 3</li>
-</ul>
+    <form action="" method="get">
+        {{ filter.form.as_p }}
+        <input type="submit" />
+    </form>
 {% endblock %}
