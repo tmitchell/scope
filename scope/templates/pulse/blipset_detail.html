@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block page-title %}{{ blipset }}{% endblock %}
+{% block page-content %}
+    <p>
+      <strong>{{ blipset.timestamp }}</strong><br />
+      <ul>
+        {% for blip in blipset.blips.all %}
+            <li>{{ blip }}</li>
+        {% endfor %}
+      </ul>
+    </p>
+{% endblock %}
+
+{% block side-title %}Tags{% endblock %}
+{% block side-content %}
+<ul>
+    <li>Tag 1</li>
+    <li>Tag 2</li>
+    <li>Tag 3</li>
+</ul>
+{% endblock %}

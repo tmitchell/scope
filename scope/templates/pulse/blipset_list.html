@@ -5,7 +5,7 @@
     {% for blipset in object_list %}
         <p>
           <strong>{{ blipset.timestamp }}</strong><br />
-          {{ blipset }}
+          <a href="{{ blipset.get_absolute_url }}">{{ blipset }}</a>
         </p>
     {% endfor %}
 {% endblock %}

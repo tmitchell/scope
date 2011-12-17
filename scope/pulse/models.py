@@ -20,6 +20,9 @@ class BlipSet(models.Model):
     def __unicode__(self):
         return self.summary
 
+    @models.permalink
+    def get_absolute_url(self):
+        return ('blipset_detail', [str(self.pk)])
 
 class Blip(PolymorphicModel):
     # Todo: Blip detail URL

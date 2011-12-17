@@ -1,7 +1,12 @@
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 
 from pulse.models import BlipSet
 
 
-class TimelineView(ListView):
-    queryset = BlipSet.objects.all()
+class Timeline(ListView):
+    model = BlipSet
+
+
+class BlipSetDetail(DetailView):
+    model = BlipSet
+    slug_field = 'pk'
