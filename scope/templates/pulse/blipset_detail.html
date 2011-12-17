@@ -2,14 +2,15 @@
 
 {% block page-title %}{{ blipset }}{% endblock %}
 {% block page-content %}
-    <p>
-      <strong>{{ blipset.timestamp }}</strong><br />
-      <ul>
-        {% for blip in blipset.blips.all %}
-            <li>{{ blip }}</li>
-        {% endfor %}
-      </ul>
-    </p>
+    {% for blip in blipset.blips.all %}
+      <p>
+        <strong>{{ blip.timestamp }}</strong><br />
+        <strong><a href="{{ blip.source_url }}">{{ blip.title }}</a></strong><br/>
+        {% if blip.summary %}
+          {{ blip.summary|safe }}
+        {% endif %}
+      </p>
+    {% endfor %}
 {% endblock %}
 
 {% block side-title %}Tags{% endblock %}

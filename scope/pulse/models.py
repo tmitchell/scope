@@ -26,7 +26,9 @@ class BlipSet(models.Model):
 
 
 class Blip(PolymorphicModel):
-    # Todo: Blip detail URL
+    source_url  = models.URLField()
+    title       = models.TextField()
+    summary     = models.TextField(null=True)
     timestamp = models.DateTimeField()
     blipset = models.ForeignKey(BlipSet, related_name='blips')
     class Meta:
@@ -34,13 +36,6 @@ class Blip(PolymorphicModel):
 
     def __unicode__(self):
         raise NotImplementedError()
-
-
-class DummyBlip(Blip):
-    message = models.TextField()
-
-    def __unicode__(self):
-        return self.message
 
 
 class Provider(PolymorphicModel):
@@ -56,7 +51,6 @@ class RSSProvider(Provider):
     url = models.URLField()
     name = models.CharField(max_length=255, blank=True)
     last_update = models.DateTimeField(editable=False, default=datetime.datetime(year=1900, month=1, day=1))
-    blip_model = DummyBlip
 
     def __unicode__(self):
         return self.name
@@ -81,7 +75,12 @@ class RSSProvider(Provider):
             if timestamp > self.last_update:
                 if blipset is None:
                     blipset = BlipSet.objects.create()
-                self.blip_model.objects.create(message=entry.title, timestamp=timestamp, blipset=blipset)
+                blip = self.create_blip(entry, blipset, timestamp)
+                blip.save()
+
+        if blipset is None:
+            logger.debug("Update performed, but no new entries found.")
+            return
 
         blips = blipset.blips.all()
         blipset.summary = u"%s new RSS items fetched from %s" % (blips.count(), self.name)
@@ -93,3 +92,25 @@ class RSSProvider(Provider):
         self.last_update = datetime.datetime.now()
         self.save()
 
+    def create_blip(self, entry, blipset, timestamp):
+        blip = Blip()
+        blip.title=entry.title
+        blip.source_url = entry.link
+        blip.timestamp=timestamp
+        blip.blipset=blipset
+        return blip
+
+class FlickrProvider(RSSProvider):
+
+    def create_blip(self, entry, blipset, timestamp):
+        blip = super(FlickrProvider, self).create_blip(entry, blipset, timestamp)
+        blip.summary = entry.description
+        return blip
+
+class BambooBuildsProvider(RSSProvider):
+
+    def create_blip(self, entry, blipset, timestamp):
+        blip = super(BambooBuildsProvider, self).create_blip(entry, blipset, timestamp)
+        blip.summary = None
+        return blip
+        
