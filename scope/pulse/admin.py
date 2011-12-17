@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from pulse.models import Blip, RSSProvider, FlickrProvider
+from pulse.models import Blip, RSSProvider, FlickrProvider, BambooBuildsProvider
 
 # Blips
 admin.site.register(Blip)
@@ -8,3 +8,4 @@ admin.site.register(Blip)
 # Providers
 admin.site.register(RSSProvider)
 admin.site.register(FlickrProvider)
+admin.site.register(BambooBuildsProvider)
