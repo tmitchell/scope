@@ -2,10 +2,10 @@
 
 {% block page-title %}Timeline{% endblock %}
 {% block page-content %}
-    {% for blip in object_list %}
+    {% for blipset in object_list %}
         <p>
-          <strong>{{ blip.timestamp }}</strong><br />
-          {{ blip }}
+          <strong>{{ blipset.timestamp }}</strong><br />
+          {{ blipset }}
         </p>
     {% endfor %}
 {% endblock %}

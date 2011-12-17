@@ -1,7 +1,7 @@
 from django.views.generic import ListView
 
-from pulse.models import Blip
+from pulse.models import BlipSet
 
 
 class TimelineView(ListView):
-    queryset = Blip.objects.all()
+    queryset = BlipSet.objects.all()
