@@ -6,6 +6,7 @@ wsgiref==0.1.2
 django-polymorphic==0.2
 feedparser==5.1
 pytz==2011n
+django-filter==0.5.3
 
 # Development
 django-debug-toolbar==0.8.5
