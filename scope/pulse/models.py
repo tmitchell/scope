@@ -11,11 +11,22 @@ from polymorphic import PolymorphicModel
 logger = logging.getLogger(__name__)
 
 
+class BlipSet(models.Model):
+    timestamp = models.DateTimeField(auto_now_add=True)
+    summary = models.CharField(max_length=255)
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __unicode__(self):
+        return self.summary
+
+
 class Blip(PolymorphicModel):
     source_url  = models.URLField()
     title       = models.TextField()
     summary     = models.TextField()
     timestamp = models.DateTimeField()
+    blipset = models.ForeignKey(BlipSet, related_name='blips')
     class Meta:
         ordering = ['-timestamp']
 
@@ -60,15 +71,22 @@ class RSSProvider(Provider):
             logger.debug("Skipping update because we updated it recently")
             return
 
+        blipset = None
+
         content = feedparser.parse(self.url)
-        new = 0
         for entry in content['entries']:
             timestamp = datetime.datetime.fromtimestamp(time.mktime(entry.updated_parsed))
             if timestamp > self.last_update:
-                self.blip_model.objects.create(message=entry.title, timestamp=timestamp)
-                new += 1
+                if blipset is None:
+                    blipset = BlipSet.objects.create()
+                self.blip_model.objects.create(message=entry.title, timestamp=timestamp, blipset=blipset)
 
-        logger.debug("Updated %d/%d feed items", new, len(content['entries']))
+        blips = blipset.blips.all()
+        blipset.summary = u"%s new RSS items fetched from %s" % (blips.count(), self.name)
+        blipset.timestamp = blips[0].timestamp  # most recent blip
+        blipset.save()
+
+        logger.debug("Updated %d/%d feed items", blips.count(), len(content['entries']))
 
         self.last_update = datetime.datetime.now()
         self.save()
