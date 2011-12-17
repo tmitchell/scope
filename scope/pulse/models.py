@@ -24,6 +24,7 @@ class BlipSet(models.Model):
     def get_absolute_url(self):
         return ('blipset_detail', [str(self.pk)])
 
+
 class Blip(PolymorphicModel):
     # Todo: Blip detail URL
     timestamp = models.DateTimeField()
