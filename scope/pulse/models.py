@@ -12,7 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 class Blip(PolymorphicModel):
-    # Todo: Blip detail URL
+    source_url  = models.URLField()
+    title       = models.TextField()
+    summary     = models.TextField()
     timestamp = models.DateTimeField()
     class Meta:
         ordering = ['-timestamp']
