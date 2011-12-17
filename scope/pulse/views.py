@@ -1,5 +1,6 @@
 from bootstrap.forms import BootstrapForm
 import django_filters
+from django import forms
 from django.views.generic.base import TemplateResponseMixin, View
 
 from pulse.models import BlipSet
@@ -11,6 +12,10 @@ class BlipSetFilterSet(django_filters.FilterSet):
         form = BootstrapForm
         model = BlipSet
         fields = ['timestamp']
+
+    def __init__(self, *args, **kwargs):
+        super(BlipSetFilterSet, self).__init__(*args, **kwargs)
+        self.filters['timestamp'].widget = forms.Select(attrs={'class':'span3'})
 
 
 class Timeline(View, TemplateResponseMixin):

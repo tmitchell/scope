@@ -12,12 +12,13 @@
   </div>
 {% endblock %}
         
-{% block side-title %}Filter{% endblock %}
+{% block side-title %}Filter Timeline{% endblock %}
 {% block side-content %}
   <div class="clearfix">
     <form action="" method="get" class="form-stacked">
         {{ filter.form }}
-        <input type="submit" />
+        <input type="submit" class="primary btn small"/>
+        <input type="reset" class="default btn small"/>
     </form>
   </div>
 {% endblock %}
