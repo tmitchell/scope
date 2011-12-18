@@ -43,6 +43,9 @@ class Provider(PolymorphicModel):
     name = models.CharField(max_length=255, blank=True)
     last_update = models.DateTimeField(editable=False, default=datetime.datetime(year=1900, month=1, day=1))
 
+    def __unicode__(self):
+        return self.name
+
     def update(self):
         """Load up the blips for this provider"""
         raise NotImplementedError()
@@ -50,9 +53,6 @@ class Provider(PolymorphicModel):
 
 class RSSProvider(Provider):
     url = models.URLField()
-
-    def __unicode__(self):
-        return self.name
 
     def save(self, *args, **kwargs):
         if not self.name:
@@ -128,6 +128,9 @@ class KunenaProvider(RSSProvider):
 class FileSystemChangeProvider(Provider):
     change_log_path = models.CharField(max_length=255)
     source_url_root = models.CharField(max_length=255)
+    verbify_dict = {"MODIFY":"modified",
+                        "CREATE":"created",
+                        "DELETE":"deleted"}
 
     def update(self):
         if (datetime.datetime.now() - self.last_update) < datetime.timedelta(minutes=self.update_frequency):
@@ -170,6 +173,3 @@ class FileSystemChangeProvider(Provider):
         self.last_update = datetime.datetime.now()
         self.save()
 
-    verbify_dict = {"MODIFY":"modified",
-                    "CREATE":"created",
-                    "DELETE":"deleted"}
