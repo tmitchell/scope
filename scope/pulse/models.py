@@ -36,7 +36,8 @@ class Blip(PolymorphicModel):
 
 class Provider(PolymorphicModel):
     update_frequency = models.IntegerField(verbose_name='Update Rate (mins)')
-    blip_model = None
+    name = models.CharField(max_length=255, blank=True)
+    last_update = models.DateTimeField(editable=False, default=datetime.datetime(year=1900, month=1, day=1))
 
     def update(self):
         """Load up the blips for this provider"""
@@ -45,8 +46,6 @@ class Provider(PolymorphicModel):
 
 class RSSProvider(Provider):
     url = models.URLField()
-    name = models.CharField(max_length=255, blank=True)
-    last_update = models.DateTimeField(editable=False, default=datetime.datetime(year=1900, month=1, day=1))
 
     def __unicode__(self):
         return self.name
@@ -120,3 +119,53 @@ class KunenaProvider(RSSProvider):
         blip.title = strings[2] + " posted to teamseas.com"
         blip.summary = strings[1][:-4]
         return blip
+
+    
+class FileSystemChangeProvider(Provider):
+    change_log_path = models.CharField(max_length=255)
+    source_url_root = models.CharField(max_length=255)
+
+    def update(self):
+        if (datetime.datetime.now() - self.last_update) < datetime.timedelta(minutes=self.update_frequency):
+            logger.debug("Skipping update because we updated it recently")
+            return
+
+        blipset = None
+
+        input = open(self.change_log_path, "r")
+        line = input.readline().strip()
+        counter=0
+        while line:
+            line_items=line.rsplit('|')
+            # [        0        ]  [       1        ] [ 2  ] [3]
+            #14:49:40 17:12:2011|/c/Administrative/|MODIFY|tmp
+            timestamp = datetime.datetime.strptime(line_items[0], "%H:%M:%S %d:%m:%Y")
+            if timestamp > self.last_update:
+                if blipset is None:
+                    blipset = BlipSet.objects.create()
+                blip = Blip(
+                    source_url='%s%s' % (self.source_url_root, line_items[3]),
+                    title='%s has been %s' % (line_items[3], self.verbify_dict[line_items[2]]),
+                    timestamp=timestamp,
+                    blipset=blipset)
+                blip.save()
+            counter+=1
+            line = input.readline().strip()
+
+        if blipset is None:
+            logger.debug("Update performed, but no new entries found.")
+            return
+
+        blips = blipset.blips.all()
+        blipset.summary = u"%s new filesystem change items fetched from %s" % (blips.count(), self.name)
+        blipset.timestamp = blips[0].timestamp  # most recent blip
+        blipset.save()
+
+        logger.debug("Updated %d/%d filesystem change items", blips.count(), counter)
+
+        self.last_update = datetime.datetime.now()
+        self.save()
+
+    verbify_dict = {"MODIFY":"modified",
+                    "CREATE":"created",
+                    "DELETE":"deleted"}
