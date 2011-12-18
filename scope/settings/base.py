@@ -64,6 +64,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # 3rd-party
     'bootstrap',
+    'taggit',
     # our project
     'pulse',
 )
