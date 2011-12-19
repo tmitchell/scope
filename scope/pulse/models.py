@@ -53,6 +53,7 @@ class Provider(PolymorphicModel):
 
 class RSSProvider(Provider):
     url = models.URLField()
+    summary_format = u"%(count)d new RSS items fetched from %(source)s"
 
     def save(self, *args, **kwargs):
         if not self.name:
@@ -82,7 +83,7 @@ class RSSProvider(Provider):
             return
 
         blips = blipset.blips.all()
-        blipset.summary = u"%s new RSS items fetched from %s" % (blips.count(), self.name)
+        blipset.summary = self.summary_format % { 'count' : blips.count(), 'source' : self.name }
         blipset.timestamp = blips[0].timestamp  # most recent blip
         blipset.save()
 
@@ -128,6 +129,7 @@ class KunenaProvider(RSSProvider):
 class FileSystemChangeProvider(Provider):
     change_log_path = models.CharField(max_length=255)
     source_url_root = models.CharField(max_length=255)
+    summary_format = u"%(count)d new filesystem changes fetched from %(source)s"
     verbify_dict = {
         "MODIFY" : "modified",
         "CREATE" : "created",
@@ -168,7 +170,7 @@ class FileSystemChangeProvider(Provider):
             return
 
         blips = blipset.blips.all()
-        blipset.summary = u"%s new filesystem change items fetched from %s" % (blips.count(), self.name)
+        blipset.summary = self.summary_format % { 'count' : blips.count(), 'source' : self.name }
         blipset.timestamp = blips[0].timestamp  # most recent blip
         blipset.save()
 
