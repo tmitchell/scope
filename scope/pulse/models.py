@@ -128,9 +128,13 @@ class KunenaProvider(RSSProvider):
 class FileSystemChangeProvider(Provider):
     change_log_path = models.CharField(max_length=255)
     source_url_root = models.CharField(max_length=255)
-    verbify_dict = {"MODIFY":"modified",
-                        "CREATE":"created",
-                        "DELETE":"deleted"}
+    verbify_dict = {
+        "MODIFY" : "modified",
+        "CREATE" : "created",
+        "DELETE" : "deleted",
+        "MOVED_FROM" : "moved from",    # todo: combine these events into a single one
+        "MOVED_TO" : "moved to",
+    }
 
     def update(self):
         if (datetime.datetime.now() - self.last_update) < datetime.timedelta(minutes=self.update_frequency):
