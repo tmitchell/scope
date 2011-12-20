@@ -92,41 +92,44 @@ class RSSProvider(Provider):
 
         super(RSSProvider, self).save(*args, **kwargs)
 
+    def _get_timestamp(self, entry):
+        """Convert the given RSS entry timestamp into a Python datetime compatible with our DB"""
+        return datetime.datetime.fromtimestamp(time.mktime(entry.updated_parsed))
+
     def _fetch_blips(self):
         blips = []
         content = feedparser.parse(self.url)
         for entry in content['entries']:
-            timestamp = datetime.datetime.fromtimestamp(time.mktime(entry.updated_parsed))
+            timestamp = self._get_timestamp(entry)
             if timestamp > self.last_update:
-                blips.append(self.create_blip(entry, timestamp))
+                blips.append(self.create_blip(entry))
         return blips
 
-    def create_blip(self, entry, timestamp):
+    def create_blip(self, entry):
         blip = Blip()
         blip.title = entry.title
         blip.source_url = entry.link
-        blip.timestamp = timestamp
+        blip.timestamp = self._get_timestamp(entry)
         return blip
 
 
 class FlickrProvider(RSSProvider):
-    def create_blip(self, entry, timestamp):
-        blip = super(FlickrProvider, self).create_blip(entry, timestamp)
+    def create_blip(self, entry):
+        blip = super(FlickrProvider, self).create_blip(entry)
         blip.summary = entry.description
         return blip
 
 
 class BambooBuildsProvider(RSSProvider):
-    def create_blip(self, entry, timestamp):
-        blip = super(BambooBuildsProvider, self).create_blip(entry, timestamp)
+    def create_blip(self, entry):
+        blip = super(BambooBuildsProvider, self).create_blip(entry)
         blip.summary = None
         return blip
 
 
 class KunenaProvider(RSSProvider):
-    def create_blip(self, entry, timestamp):
-        blip = super(KunenaProvider, self).create_blip(entry, timestamp)
-
+    def create_blip(self, entry):
+        blip = super(KunenaProvider, self).create_blip(entry)
         strings = entry.title.rsplit(': ')
         blip.title = strings[2] + " posted to teamseas.com"
         blip.summary = strings[1][:-4]
