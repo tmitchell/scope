@@ -63,7 +63,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     # 3rd-party
-    'bootstrap',
+    'bootstrapform',
     'taggit',
     'taggit_templatetags',
     # our project

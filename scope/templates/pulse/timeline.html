@@ -1,4 +1,4 @@
-{% extends "pulse/blipset_list.html" %}
+{% extends "pulse/blipset_list.html" %}{% load bootstrap %}
 
 {% block page-title %}Timeline{% endblock %}
 {% block page-content %}
@@ -11,8 +11,8 @@
 {% block side-content %}
    <div class="clearfix">
      <form action="" method="get" class="form-stacked">
-         {{ filter.form }}
-         {{ tag_filter_form }}
+         {{ filter.form|bootstrap }}
+         {{ tag_filter_form|bootstrap }}
          <input type="submit" class="primary btn small"/>
          <input type="reset" class="default btn small"/>
      </form>
