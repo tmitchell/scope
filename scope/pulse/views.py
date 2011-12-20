@@ -29,9 +29,10 @@ class Timeline(View, TemplateResponseMixin):
         queryset = BlipSet.objects.all()
         if tag_filter_form.is_valid():
             selected_tags = tag_filter_form.cleaned_data['tags']
-            blipset_content_type = ContentType.objects.get_for_model(queryset.model)
-            tagged_blipsets = TaggedItem.objects.filter(tag__in=selected_tags, content_type=blipset_content_type)
-            queryset = queryset.filter(pk__in=tagged_blipsets.values_list('object_id', flat=True))
+            if selected_tags:
+                blipset_content_type = ContentType.objects.get_for_model(queryset.model)
+                tagged_blipsets = TaggedItem.objects.filter(tag__in=selected_tags, content_type=blipset_content_type)
+                queryset = queryset.filter(pk__in=tagged_blipsets.values_list('object_id', flat=True))
 
         context = {
             'filter' : BlipSetFilterSet(request.GET, queryset=queryset),
