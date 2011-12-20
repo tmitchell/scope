@@ -22,13 +22,13 @@ class BlipSet(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('blipset_detail', [str(self.pk)])
+        return 'blipset_detail', [str(self.pk)]
 
 
 class Blip(PolymorphicModel):
-    source_url  = models.URLField()
-    title       = models.TextField()
-    summary     = models.TextField(null=True)
+    source_url = models.URLField()
+    title = models.TextField()
+    summary = models.TextField(null=True)
     timestamp = models.DateTimeField()
     blipset = models.ForeignKey(BlipSet, related_name='blips')
     class Meta:
@@ -42,17 +42,48 @@ class Provider(PolymorphicModel):
     update_frequency = models.IntegerField(verbose_name='Update Rate (mins)')
     name = models.CharField(max_length=255, blank=True)
     last_update = models.DateTimeField(editable=False, default=datetime.datetime(year=1900, month=1, day=1))
+    summary_format = u"%(count)d new items fetched from %(source)s"
 
     def __unicode__(self):
         return self.name
 
     def update(self):
-        """Load up the blips for this provider"""
+        if (datetime.datetime.now() - self.last_update) < datetime.timedelta(minutes=self.update_frequency):
+            logger.debug("Skipping update because we updated it recently")
+            return
+
+        blips = self._fetch_blips()
+        if not blips:
+            logger.debug("No new items found.")
+            return
+
+        summary_args = { 'count' : len(blips), 'source' : self.name }
+        blipset = BlipSet()
+        blipset.summary = self.summary_format % summary_args
+        blipset.timestamp = max(blips, key=lambda b: b.timestamp)   # latest of all of the new blips
+        blipset.save()
+
+        # save blips
+        for b in blips:
+            b.blipset = blipset
+            b.save()
+
+        logger.debug(blipset)
+
+        self.last_update = datetime.datetime.now()
+        self.save()
+
+    def _fetch_blips(self):
+        """Grab all of the blips to be created by this update
+
+        Does not save them into the database, this way we can create/update the blipset in one place
+        """
         raise NotImplementedError()
 
 
 class RSSProvider(Provider):
     url = models.URLField()
+    summary_format = u"%(count)d new RSS items fetched from %(source)s"
 
     def save(self, *args, **kwargs):
         if not self.name:
@@ -61,64 +92,47 @@ class RSSProvider(Provider):
 
         super(RSSProvider, self).save(*args, **kwargs)
 
-    def update(self):
-        if (datetime.datetime.now() - self.last_update) < datetime.timedelta(minutes=self.update_frequency):
-            logger.debug("Skipping update because we updated it recently")
-            return
+    def _get_timestamp(self, entry):
+        """Convert the given RSS entry timestamp into a Python datetime compatible with our DB"""
+        return datetime.datetime.fromtimestamp(time.mktime(entry.updated_parsed))
 
-        blipset = None
-
+    def _fetch_blips(self):
+        blips = []
         content = feedparser.parse(self.url)
         for entry in content['entries']:
-            timestamp = datetime.datetime.fromtimestamp(time.mktime(entry.updated_parsed))
+            timestamp = self._get_timestamp(entry)
             if timestamp > self.last_update:
-                if blipset is None:
-                    blipset = BlipSet.objects.create()
-                blip = self.create_blip(entry, blipset, timestamp)
-                blip.save()
+                blips.append(self.create_blip(entry))
+        return blips
 
-        if blipset is None:
-            logger.debug("Update performed, but no new entries found.")
-            return
-
-        blips = blipset.blips.all()
-        blipset.summary = u"%s new RSS items fetched from %s" % (blips.count(), self.name)
-        blipset.timestamp = blips[0].timestamp  # most recent blip
-        blipset.save()
-
-        logger.debug("Updated %d/%d feed items", blips.count(), len(content['entries']))
-
-        self.last_update = datetime.datetime.now()
-        self.save()
-
-    def create_blip(self, entry, blipset, timestamp):
+    def create_blip(self, entry):
         blip = Blip()
-        blip.title=entry.title
+        blip.title = entry.title
         blip.source_url = entry.link
-        blip.timestamp=timestamp
-        blip.blipset=blipset
+        blip.timestamp = self._get_timestamp(entry)
         return blip
 
-class FlickrProvider(RSSProvider):
 
-    def create_blip(self, entry, blipset, timestamp):
-        blip = super(FlickrProvider, self).create_blip(entry, blipset, timestamp)
+class FlickrProvider(RSSProvider):
+    summary_format = u"%(count)d new images posted to %(source)s"
+    def create_blip(self, entry):
+        blip = super(FlickrProvider, self).create_blip(entry)
         blip.summary = entry.description
         return blip
 
-class BambooBuildsProvider(RSSProvider):
 
-    def create_blip(self, entry, blipset, timestamp):
-        blip = super(BambooBuildsProvider, self).create_blip(entry, blipset, timestamp)
+class BambooBuildsProvider(RSSProvider):
+    summary_format = u"%(count)d new builds ran in %(source)s"
+    def create_blip(self, entry):
+        blip = super(BambooBuildsProvider, self).create_blip(entry)
         blip.summary = None
         return blip
 
 
 class KunenaProvider(RSSProvider):
-
-    def create_blip(self, entry, blipset, timestamp):
-        blip = super(KunenaProvider, self).create_blip(entry, blipset, timestamp)
-
+    summary_format = u"%(count)d new comments posted to %(source)s"
+    def create_blip(self, entry):
+        blip = super(KunenaProvider, self).create_blip(entry)
         strings = entry.title.rsplit(': ')
         blip.title = strings[2] + " posted to teamseas.com"
         blip.summary = strings[1][:-4]
@@ -128,6 +142,7 @@ class KunenaProvider(RSSProvider):
 class FileSystemChangeProvider(Provider):
     change_log_path = models.CharField(max_length=255)
     source_url_root = models.CharField(max_length=255)
+    summary_format = u"%(count)d new filesystem changes fetched from %(source)s"
     verbify_dict = {
         "MODIFY" : "modified",
         "CREATE" : "created",
@@ -136,44 +151,20 @@ class FileSystemChangeProvider(Provider):
         "MOVED_TO" : "moved to",
     }
 
-    def update(self):
-        if (datetime.datetime.now() - self.last_update) < datetime.timedelta(minutes=self.update_frequency):
-            logger.debug("Skipping update because we updated it recently")
-            return
-
-        blipset = None
-
+    def _fetch_blips(self):
+        blips = []
         input = open(self.change_log_path, "r")
         line = input.readline().strip()
-        counter=0
         while line:
-            line_items=line.rsplit('|')
+            line_items = line.rsplit('|')
             # [        0        ]  [       1        ] [ 2  ] [3]
             #14:49:40 17:12:2011|/c/Administrative/|MODIFY|tmp
             timestamp = datetime.datetime.strptime(line_items[0], "%H:%M:%S %d:%m:%Y")
             if timestamp > self.last_update:
-                if blipset is None:
-                    blipset = BlipSet.objects.create()
-                blip = Blip(
-                    source_url='%s%s' % (self.source_url_root, line_items[3]),
-                    title='%s has been %s' % (line_items[3], self.verbify_dict[line_items[2]]),
-                    timestamp=timestamp,
-                    blipset=blipset)
-                blip.save()
-            counter+=1
+                blip = Blip()
+                blip.source_url = '%s%s' % (self.source_url_root, line_items[3])
+                blip.title = '%s has been %s' % (line_items[3], self.verbify_dict[line_items[2]])
+                blip.timestamp = timestamp
+                blips.append(blip)
             line = input.readline().strip()
-
-        if blipset is None:
-            logger.debug("Update performed, but no new entries found.")
-            return
-
-        blips = blipset.blips.all()
-        blipset.summary = u"%s new filesystem change items fetched from %s" % (blips.count(), self.name)
-        blipset.timestamp = blips[0].timestamp  # most recent blip
-        blipset.save()
-
-        logger.debug("Updated %d/%d filesystem change items", blips.count(), counter)
-
-        self.last_update = datetime.datetime.now()
-        self.save()
-
+        return blips
