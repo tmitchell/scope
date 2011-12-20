@@ -1,10 +1,9 @@
 from django.contrib import admin
 
-from pulse.models import Blip, RSSProvider, FlickrProvider, BambooBuildsProvider, KunenaProvider, FileSystemChangeProvider
+from pulse.models import BlipSet, RSSProvider, FlickrProvider, BambooBuildsProvider, KunenaProvider, FileSystemChangeProvider
 
-
-# Blips
-admin.site.register(Blip)
+# Blips, etc
+admin.site.register(BlipSet)
 
 # Providers
 admin.site.register(RSSProvider)
