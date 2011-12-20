@@ -93,6 +93,9 @@ LOGGING = {
     }
 }
 
+TAGGIT_TAGCLOUD_MIN = 10
+TAGGIT_TAGCLOUD_MAX = 24
+
 try:
     from local_settings import *
 except ImportError:

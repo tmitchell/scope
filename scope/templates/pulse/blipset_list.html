@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load taggit_extras %}
 
 {% block page-title %}BlipSets{% endblock %}
 
@@ -16,5 +16,17 @@
           {% endif %}
         </p>
     {% endfor %}
+  </div>
+{% endblock %}
+
+{% block side-content %}
+  <h3>Tags</h3>
+  <div class="clearfix">
+  {% get_tagcloud as tags for 'pulse.BlipSet' %}
+  <p>
+      {% for tag in tags %}
+        <span style="font-size:{{ tag.weight|floatformat:0 }}px;"> <a href="{% url blipset_tags tag.slug %}">{{ tag }}</a></span>
+      {% endfor %}
+  </p>
   </div>
 {% endblock %}
