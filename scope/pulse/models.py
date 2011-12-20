@@ -71,6 +71,10 @@ class Provider(PolymorphicModel):
             b.blipset = blipset
             b.save()
 
+        for t in self.tags.all():
+            blipset.tags.add(t)
+            logger.debug("Tagged blipset %s with %s", blipset, t)
+
         logger.debug(blipset)
 
         self.last_update = datetime.datetime.now()
