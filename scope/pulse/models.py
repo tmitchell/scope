@@ -22,13 +22,13 @@ class BlipSet(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('blipset_detail', [str(self.pk)])
+        return 'blipset_detail', [str(self.pk)]
 
 
 class Blip(PolymorphicModel):
-    source_url  = models.URLField()
-    title       = models.TextField()
-    summary     = models.TextField(null=True)
+    source_url = models.URLField()
+    title = models.TextField()
+    summary = models.TextField(null=True)
     timestamp = models.DateTimeField()
     blipset = models.ForeignKey(BlipSet, related_name='blips')
     class Meta:
@@ -103,20 +103,20 @@ class RSSProvider(Provider):
 
     def create_blip(self, entry, timestamp):
         blip = Blip()
-        blip.title=entry.title
+        blip.title = entry.title
         blip.source_url = entry.link
-        blip.timestamp=timestamp
+        blip.timestamp = timestamp
         return blip
 
-class FlickrProvider(RSSProvider):
 
+class FlickrProvider(RSSProvider):
     def create_blip(self, entry, timestamp):
         blip = super(FlickrProvider, self).create_blip(entry, timestamp)
         blip.summary = entry.description
         return blip
 
-class BambooBuildsProvider(RSSProvider):
 
+class BambooBuildsProvider(RSSProvider):
     def create_blip(self, entry, timestamp):
         blip = super(BambooBuildsProvider, self).create_blip(entry, timestamp)
         blip.summary = None
@@ -124,7 +124,6 @@ class BambooBuildsProvider(RSSProvider):
 
 
 class KunenaProvider(RSSProvider):
-
     def create_blip(self, entry, timestamp):
         blip = super(KunenaProvider, self).create_blip(entry, timestamp)
 
@@ -151,7 +150,7 @@ class FileSystemChangeProvider(Provider):
         input = open(self.change_log_path, "r")
         line = input.readline().strip()
         while line:
-            line_items=line.rsplit('|')
+            line_items = line.rsplit('|')
             # [        0        ]  [       1        ] [ 2  ] [3]
             #14:49:40 17:12:2011|/c/Administrative/|MODIFY|tmp
             timestamp = datetime.datetime.strptime(line_items[0], "%H:%M:%S %d:%m:%Y")
