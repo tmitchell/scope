@@ -88,7 +88,10 @@ class RSSProvider(Provider):
     def save(self, *args, **kwargs):
         if not self.name:
             content = feedparser.parse(self.url)
-            self.name = content['feed']['title']
+            try:
+                self.name = content['feed']['title']
+            except KeyError:
+                self.name = self.url
 
         super(RSSProvider, self).save(*args, **kwargs)
 
