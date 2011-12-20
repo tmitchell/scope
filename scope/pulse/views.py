@@ -1,8 +1,11 @@
 from bootstrap.forms import BootstrapForm
 import django_filters
 from django import forms
+from django.contrib.contenttypes.models import ContentType
 from django.views.generic.base import TemplateResponseMixin, View
+from taggit.models import TaggedItem
 
+from pulse.forms import TagFilterForm
 from pulse.models import BlipSet
 
 
@@ -22,5 +25,16 @@ class Timeline(View, TemplateResponseMixin):
     template_name = 'pulse/timeline.html'
 
     def get(self, request, *args, **kwargs):
-        context = { 'filter' : BlipSetFilterSet(request.GET, queryset=BlipSet.objects.all()) }
+        tag_filter_form = TagFilterForm(request.GET or None)
+        queryset = BlipSet.objects.all()
+        if tag_filter_form.is_valid():
+            selected_tags = tag_filter_form.cleaned_data['tags']
+            blipset_content_type = ContentType.objects.get_for_model(queryset.model)
+            tagged_blipsets = TaggedItem.objects.filter(tag__in=selected_tags, content_type=blipset_content_type)
+            queryset = queryset.filter(pk__in=tagged_blipsets.values_list('object_id', flat=True))
+
+        context = {
+            'filter' : BlipSetFilterSet(request.GET, queryset=queryset),
+            'tag_filter_form' : tag_filter_form
+        }
         return self.render_to_response(context)
