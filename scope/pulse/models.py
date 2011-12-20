@@ -4,6 +4,7 @@ import time
 
 import feedparser
 from django.db import models
+from taggit.managers import TaggableManager
 
 from polymorphic import PolymorphicModel
 
@@ -14,6 +15,7 @@ logger = logging.getLogger(__name__)
 class BlipSet(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     summary = models.CharField(max_length=255)
+    tags = TaggableManager()
     class Meta:
         ordering = ['-timestamp']
 
@@ -43,6 +45,7 @@ class Provider(PolymorphicModel):
     name = models.CharField(max_length=255, blank=True)
     last_update = models.DateTimeField(editable=False, default=datetime.datetime(year=1900, month=1, day=1))
     summary_format = u"%(count)d new items fetched from %(source)s"
+    tags = TaggableManager()
 
     def __unicode__(self):
         return self.name
