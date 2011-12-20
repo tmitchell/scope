@@ -47,7 +47,14 @@ class Provider(PolymorphicModel):
         return self.name
 
     def update(self):
-        """Load up the blips for this provider"""
+        """Load up the blipset and associated blips for this provider"""
+        raise NotImplementedError()
+
+    def _fetch_blips(self):
+        """Grab all of the blips to be created by this update
+
+        Does not save them into the database, this way we can create/update the blipset in one place
+        """
         raise NotImplementedError()
 
 
@@ -62,63 +69,67 @@ class RSSProvider(Provider):
 
         super(RSSProvider, self).save(*args, **kwargs)
 
+    def _fetch_blips(self):
+        blips = []
+        content = feedparser.parse(self.url)
+        for entry in content['entries']:
+            timestamp = datetime.datetime.fromtimestamp(time.mktime(entry.updated_parsed))
+            if timestamp > self.last_update:
+                blips.append(self.create_blip(entry, timestamp))
+        return blips
+
     def update(self):
         if (datetime.datetime.now() - self.last_update) < datetime.timedelta(minutes=self.update_frequency):
             logger.debug("Skipping update because we updated it recently")
             return
 
-        blipset = None
-
-        content = feedparser.parse(self.url)
-        for entry in content['entries']:
-            timestamp = datetime.datetime.fromtimestamp(time.mktime(entry.updated_parsed))
-            if timestamp > self.last_update:
-                if blipset is None:
-                    blipset = BlipSet.objects.create()
-                blip = self.create_blip(entry, blipset, timestamp)
-                blip.save()
-
-        if blipset is None:
-            logger.debug("Update performed, but no new entries found.")
+        blips = self._fetch_blips()
+        if not blips:
+            logger.debug("No new entries found.")
             return
 
-        blips = blipset.blips.all()
-        blipset.summary = self.summary_format % { 'count' : blips.count(), 'source' : self.name }
-        blipset.timestamp = blips[0].timestamp  # most recent blip
+        summary_args = { 'count' : len(blips), 'source' : self.name }
+        blipset = BlipSet()
+        blipset.summary = self.summary_format % summary_args
+        blipset.timestamp = max(blips, key=lambda b: b.timestamp)   # latest of all of the new blips
         blipset.save()
 
-        logger.debug("Updated %d/%d feed items", blips.count(), len(content['entries']))
+        # save blips
+        for b in blips:
+            b.blipset = blipset
+            b.save()
+
+        logger.debug(blipset)
 
         self.last_update = datetime.datetime.now()
         self.save()
 
-    def create_blip(self, entry, blipset, timestamp):
+    def create_blip(self, entry, timestamp):
         blip = Blip()
         blip.title=entry.title
         blip.source_url = entry.link
         blip.timestamp=timestamp
-        blip.blipset=blipset
         return blip
 
 class FlickrProvider(RSSProvider):
 
-    def create_blip(self, entry, blipset, timestamp):
-        blip = super(FlickrProvider, self).create_blip(entry, blipset, timestamp)
+    def create_blip(self, entry, timestamp):
+        blip = super(FlickrProvider, self).create_blip(entry, timestamp)
         blip.summary = entry.description
         return blip
 
 class BambooBuildsProvider(RSSProvider):
 
-    def create_blip(self, entry, blipset, timestamp):
-        blip = super(BambooBuildsProvider, self).create_blip(entry, blipset, timestamp)
+    def create_blip(self, entry, timestamp):
+        blip = super(BambooBuildsProvider, self).create_blip(entry, timestamp)
         blip.summary = None
         return blip
 
 
 class KunenaProvider(RSSProvider):
 
-    def create_blip(self, entry, blipset, timestamp):
-        blip = super(KunenaProvider, self).create_blip(entry, blipset, timestamp)
+    def create_blip(self, entry, timestamp):
+        blip = super(KunenaProvider, self).create_blip(entry, timestamp)
 
         strings = entry.title.rsplit(': ')
         blip.title = strings[2] + " posted to teamseas.com"
