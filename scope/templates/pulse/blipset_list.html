@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block page-title %}BlipSets{% endblock %}
+
+{% block page-content %}
+  <div class="clearfix">
+    {% for blipset in object_list %}
+        <p>
+          <strong>{{ blipset.timestamp }}</strong><br />
+          <a href="{{ blipset.get_absolute_url }}">{{ blipset }}</a><br />
+          {% if blipset.tags.exists %}
+              <em>Tags:</em>
+              {% for tag in blipset.tags.all %}
+                <a href="{% url blipset_tags tag.slug %}">{{ tag }}</a>
+              {% endfor %}
+          {% endif %}
+        </p>
+    {% endfor %}
+  </div>
+{% endblock %}

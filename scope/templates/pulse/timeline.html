@@ -1,24 +1,19 @@
-{% extends "base.html" %}
+{% extends "pulse/blipset_list.html" %}
 
 {% block page-title %}Timeline{% endblock %}
 {% block page-content %}
-  <div class="clearfix">
-    {% for blipset in filter %}
-        <p>
-          <strong>{{ blipset.timestamp }}</strong><br />
-          <a href="{{ blipset.get_absolute_url }}">{{ blipset }}</a>
-        </p>
-    {% endfor %}
-  </div>
+    {% with filter as object_list %}
+        {{ block.super }}
+    {% endwith %}
 {% endblock %}
-        
+
 {% block side-title %}Filter Timeline{% endblock %}
 {% block side-content %}
-  <div class="clearfix">
-    <form action="" method="get" class="form-stacked">
-        {{ filter.form }}
-        <input type="submit" class="primary btn small"/>
-        <input type="reset" class="default btn small"/>
-    </form>
-  </div>
+   <div class="clearfix">
+     <form action="" method="get" class="form-stacked">
+         {{ filter.form }}
+         <input type="submit" class="primary btn small"/>
+         <input type="reset" class="default btn small"/>
+     </form>
+   </div>
 {% endblock %}
