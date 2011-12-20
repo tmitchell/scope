@@ -1,0 +1,9 @@
+#!/bin/sh -e
+
+echo 1048576 > /proc/sys/fs/inotify/max_user_watches
+
+/root/bin/inotifywatch.sh Administrative
+/root/bin/inotifywatch.sh IT
+/root/bin/inotifywatch.sh Technical
+
+exit 0
