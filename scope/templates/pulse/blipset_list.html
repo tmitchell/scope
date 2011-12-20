@@ -1,19 +1,31 @@
-{% extends "base.html" %}{% load taggit_extras %}
+{% extends "base.html" %}{% load taggit_extras %}{% load pulse_extras %}
 
 {% block page-title %}BlipSets{% endblock %}
 
 {% block page-content %}
   <div class="clearfix">
     {% for blipset in object_list %}
-        <p>
-          <a href="{{ blipset.get_absolute_url }}">{{ blipset }}</a><br />
-            <em>{{ blipset.timestamp }}</em><br />
+
+      {% get_daily_timestamp blipset.timestamp as timestamp %}
+      {% if timestamp %}
+        <div class="row">
+            <div class="span16">
+                <h3>{{ timestamp|date:"l, M d Y" }}</h3>
+            </div>
+        </div>
+      {% endif %}
+
+      <div class="row">
+          <div class="span16">
+          <h4><a href="{{ blipset.get_absolute_url }}">{{ blipset }}</a></h4>
+          <em>{{ blipset.timestamp }}</em>
             {% if blipset.tags.exists %}
               {% for tag in blipset.tags.all %}
                 <span class="label"><a href="{% url blipset_tags tag.slug %}">{{ tag }}</a></span>
               {% endfor %}
           {% endif %}
-        </p>
+          </div>
+      </div>
     {% endfor %}
   </div>
 {% endblock %}
