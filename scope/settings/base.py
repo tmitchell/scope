@@ -65,6 +65,7 @@ INSTALLED_APPS = (
     # 3rd-party
     'bootstrap',
     'taggit',
+    'taggit_templatetags',
     # our project
     'pulse',
 )

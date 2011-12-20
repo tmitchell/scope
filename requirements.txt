@@ -9,6 +9,8 @@ pytz==2011n
 django-filter==0.5.3
 -e git+https://github.com/earle/django-bootstrap.git@7776aafd64faae9c3c3699b1b44de259bc8c3e1b#egg=bootstrap-dev
 django-taggit==0.9.3
+django-taggit-templatetags==0.4.6dev
+django-templatetag-sugar==0.1
 
 # Development
 django-debug-toolbar==0.8.5
