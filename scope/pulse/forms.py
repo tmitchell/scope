@@ -1,9 +1,8 @@
-from bootstrap.forms import BootstrapForm
 from django import forms
 from taggit.models import Tag
 
 
-class TagFilterForm(BootstrapForm):
+class TagFilterForm(forms.Form):
     tags = forms.ModelMultipleChoiceField(queryset=Tag.objects.all().order_by('name'),
-                                          widget=forms.CheckboxSelectMultiple,
+                                          help_text="Hold Ctrl/Cmd to select multiple",
                                           required=False)
