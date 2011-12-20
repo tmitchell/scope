@@ -19,7 +19,7 @@ class GetDailyTimestampNode(template.Node):
             timestamp = self.timestamp.resolve(context)
             ymd_timestamp = datetime(year=timestamp.year, month=timestamp.month, day=timestamp.day)
             # see if the date we've gotten represents a new day for the timeline
-            if self in context.render_context and ymd_timestamp <= context.render_context[self]:
+            if self in context.render_context and ymd_timestamp >= context.render_context[self]:
                 return ''
             context.render_context[self] = ymd_timestamp
             context[self.context_var_name] = ymd_timestamp
