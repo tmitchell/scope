@@ -114,6 +114,7 @@ class RSSProvider(Provider):
 
 
 class FlickrProvider(RSSProvider):
+    summary_format = u"%(count)d new images posted to %(source)s"
     def create_blip(self, entry):
         blip = super(FlickrProvider, self).create_blip(entry)
         blip.summary = entry.description
@@ -121,6 +122,7 @@ class FlickrProvider(RSSProvider):
 
 
 class BambooBuildsProvider(RSSProvider):
+    summary_format = u"%(count)d new builds ran in %(source)s"
     def create_blip(self, entry):
         blip = super(BambooBuildsProvider, self).create_blip(entry)
         blip.summary = None
@@ -128,6 +130,7 @@ class BambooBuildsProvider(RSSProvider):
 
 
 class KunenaProvider(RSSProvider):
+    summary_format = u"%(count)d new comments posted to %(source)s"
     def create_blip(self, entry):
         blip = super(KunenaProvider, self).create_blip(entry)
         strings = entry.title.rsplit(': ')
