@@ -1,23 +1,31 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load pulse_extras %}
 
 {% block page-title %}{{ blipset }}{% endblock %}
 {% block page-content %}
     {% for blip in blipset.blips.all %}
-      <p>
-        <strong>{{ blip.timestamp }}</strong><br />
-        <strong><a href="{{ blip.source_url }}">{{ blip.title }}</a></strong><br/>
-        {% if blip.summary %}
-          {{ blip.summary|safe }}
+        {% get_daily_timestamp blip.timestamp as timestamp %}
+        {% if timestamp %}
+            <h3>{{ timestamp|date:"l, M d Y" }}</h3>
         {% endif %}
-      </p>
+
+        <p>
+            <strong>{{ blip.timestamp }}</strong><br />
+            <strong><a href="{{ blip.source_url }}">{{ blip.title }}</a></strong><br/>
+            {% if blip.summary %}
+              {{ blip.summary|safe }}
+            {% endif %}
+        </p>
     {% endfor %}
 {% endblock %}
 
-{% block side-title %}Tags{% endblock %}
+{% block side-title %}Metadata{% endblock %}
 {% block side-content %}
-<ul>
-    <li>Tag 1</li>
-    <li>Tag 2</li>
-    <li>Tag 3</li>
-</ul>
+    <h4>Tags</h4>
+    <ul>
+        {% for tag in blipset.tags.all %}
+        <li>
+            <a href="{% url blipset_tags tag.slug %}">{{ tag }}</a>
+        </li>
+        {% endfor %}
+    </ul>
 {% endblock %}
