@@ -9,15 +9,14 @@
 
 {% block side-title %}Filter Timeline{% endblock %}
 {% block side-content %}
-   <div class="clearfix">
      <form action="" method="get" class="form-stacked">
          {{ filter.form|bootstrap }}
          {{ tag_filter_form|bootstrap }}
-         <input type="submit" class="primary btn small"/>
-         <input type="reset" class="default btn small"/>
+         <div class="well" style="padding: 5px 5px;">
+             <input type="submit" class="primary btn small"/>&nbsp;
+             <input type="reset" class="default btn small"/>
+         </div>
      </form>
-   </div>
-
   {{ block.super }}
 
 {% endblock %}

@@ -30,6 +30,7 @@ class Timeline(View, TemplateResponseMixin):
             if selected_tags:
                 blipset_content_type = ContentType.objects.get_for_model(queryset.model)
                 tagged_blipsets = TaggedItem.objects.filter(tag__in=selected_tags, content_type=blipset_content_type)
+                # Todo: do we want the tags to be an AND or an OR filter?  Right now it's an OR
                 queryset = queryset.filter(pk__in=tagged_blipsets.values_list('object_id', flat=True))
 
         context = {

@@ -25,12 +25,10 @@
 
 {% block side-content %}
   <h4>Tag Cloud</h4>
-  <div class="clearfix">
-  {% get_tagcloud as tags for 'pulse.BlipSet' %}
-  <p>
+  <div class="well">
+      {% get_tagcloud as tags for 'pulse.BlipSet' %}
       {% for tag in tags %}
         <span style="font-size:{{ tag.weight|floatformat:0 }}px;"> <a href="{% url blipset_tags tag.slug %}">{{ tag }}</a></span>
       {% endfor %}
-  </p>
   </div>
 {% endblock %}
