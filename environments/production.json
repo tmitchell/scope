@@ -1,0 +1,8 @@
+{
+    "name" : "production",
+    "description" : "Production environment",
+
+    "chef_type": "environment",
+    "json_class": "Chef::Environment"
+
+}

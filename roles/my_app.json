@@ -1,0 +1,14 @@
+{
+    "name" : "my_app",
+    "description" : "deploy my_app",
+
+    "chef_type": "role",
+    "json_class": "Chef::Role",
+
+    "run_list" : [
+        "recipe[application]"
+    ],
+
+    "default_attributes": {},
+    "override_attributes": {}
+}
