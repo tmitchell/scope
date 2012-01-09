@@ -23,7 +23,6 @@
   </head>
 
   <body>
-
     <div class="topbar">
       <div class="fill">
         <div class="container">
@@ -46,7 +45,9 @@
 
       <div class="content">
         <div class="page-header">
-          <h1>{% block page-header %}ExoScope <small>Keeping the pulse of the company</small>{% endblock %}</h1>
+          <h1>{% block page-header %}<img id="banner" alt="ExoScope" src="{{ STATIC_URL }}img/banner.png" width=150 height=50>
+              <small>Keeping the pulse of the company</small>{% endblock %}
+          </h1>
         </div>
         <div class="row">
           <div class="span10">
