@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class BlipSet(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     tags = TaggableManager()
-    provider = models.ForeignKey('Provider', null=True, on_delete=models.SET_NULL, related_name='blip_sets')
+    provider = models.ForeignKey('Provider', null=True, editable=False, on_delete=models.SET_NULL, related_name='blip_sets')
     summary = models.TextField(editable=False, null=True)
     class Meta:
         ordering = ['-timestamp']
