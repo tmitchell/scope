@@ -1,16 +1,25 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
-
-Replace this with more appropriate tests for your application.
-"""
-
 from django.test import TestCase
+from pulse.models import Provider, BlipSet
 
 
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
-        """
-        Tests that 1 + 1 always equals 2.
-        """
-        self.assertEqual(1 + 1, 2)
+class BlipSetTest(TestCase):
+    def setUp(self):
+        self.provider = Provider.objects.create(update_frequency=1440, name='TestProvider', summary_format='Test %(count)d %(source)s')
+
+    def test_render(self):
+        bs = BlipSet.objects.create(provider=self.provider)
+        self.assertEqual(bs.__unicode__(), "Test 0 TestProvider")
+
+
+class ProviderSignalTest(TestCase):
+    def setUp(self):
+        self.provider = Provider.objects.create(update_frequency=1440, name='TestProvider', summary_format='Test %(count)d %(source)s')
+
+    def test_provider_delete(self):
+        bs = BlipSet.objects.create(provider=self.provider)
+        assert bs.__unicode__() == "Test 0 TestProvider"    # precondition
+        self.provider.delete()
+
+        bs = BlipSet.objects.get()                  # retrieve again from DB
+        self.assertIsNone(bs.provider)
+        self.assertEqual(bs.__unicode__(), "Test 0 TestProvider")

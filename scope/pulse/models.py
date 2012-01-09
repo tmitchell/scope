@@ -4,6 +4,7 @@ import time
 
 import feedparser
 from django.db import models
+from django.db.models import signals
 from taggit.managers import TaggableManager
 
 from polymorphic import PolymorphicModel
@@ -14,13 +15,28 @@ logger = logging.getLogger(__name__)
 
 class BlipSet(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
-    summary = models.CharField(max_length=255)
     tags = TaggableManager()
+    provider = models.ForeignKey('Provider', null=True, on_delete=models.SET_NULL, related_name='blip_sets')
+    summary_format = models.TextField(editable=False, null=True)
+    source = models.CharField(max_length=255, editable=False, null=True)
     class Meta:
         ordering = ['-timestamp']
 
     def __unicode__(self):
-        return self.summary
+        # the summary_args get string-formatted into the summary_format, so we can customize the
+        # message that gets stored with the blipset
+        # Note: if you edit this, make sure you update the help text for Provider.summary_format
+        summary_args = {
+            'count' : self.blips.count(),
+        }
+        if self.provider is None:
+            # provider was deleted so use the locally-stored values
+            summary_args['source'] = self.source
+            summary_format = self.summary_format
+        else:
+            summary_args['source'] = self.provider.name
+            summary_format = self.provider.summary_format
+        return summary_format % summary_args
 
     @models.permalink
     def get_absolute_url(self):
@@ -66,12 +82,7 @@ class Provider(PolymorphicModel):
             logger.debug("No new items found.")
             return
 
-        # the summary_args get string-formatted into the summary_format on each Provider, so we can customize the
-        # message that gets stored with the blipset
-        # Note: if you edit this, make sure you update the help text for Provider.summary_format
-        summary_args = { 'count' : len(blips), 'source' : self.name }
-
-        blipset = BlipSet.objects.create(summary=self.summary_format % summary_args,
+        blipset = BlipSet.objects.create(provider=self,
                                          timestamp=max(blips, key=lambda b: b.timestamp),  # latest of all of the new blips
         )
 
@@ -183,3 +194,17 @@ class FileSystemChangeProvider(Provider):
                 )
                 blips.append(blip)
         return blips
+
+
+# signals, etc.
+
+
+def copy_provider_data_to_blipset(sender, **kwargs):
+    """Copy the Provider's summary information to all BlipSets referencing it
+
+    If a Provider gets deleted, we don't delete the existing BlipSets, so we need to back up the summary_format
+    and name so we can still render the BlipSet summary
+    """
+    provider = kwargs['instance']
+    provider.blip_sets.update(summary_format=provider.summary_format, source=provider.name)
+signals.pre_delete.connect(copy_provider_data_to_blipset, sender=Provider)
