@@ -44,7 +44,8 @@ class Provider(PolymorphicModel):
     update_frequency = models.IntegerField(verbose_name='Update Rate (mins)')
     name = models.CharField(max_length=255, blank=True)
     last_update = models.DateTimeField(editable=False, default=datetime.datetime(year=1900, month=1, day=1))
-    summary_format = u"%(count)d new items fetched from %(source)s"
+    blip_name_plural="items"
+    summary_format = u"%(count)d new %(blip_name_plural)s fetched from %(source)s"
     tags = TaggableManager()
 
     def __unicode__(self):
@@ -67,7 +68,7 @@ class Provider(PolymorphicModel):
 
         # the summary_args get string-formatted into the summary_format on each Provider, so we can customize the
         # message that gets stored with the blipset
-        summary_args = { 'count' : len(blips), 'source' : self.name }
+        summary_args = { 'count' : len(blips), 'blip_name_plural' : self.blip_name_plural, 'source' : self.name }
 
         blipset = BlipSet.objects.create(summary=self.summary_format % summary_args,
                                          timestamp=max(blips, key=lambda b: b.timestamp),  # latest of all of the new blips
@@ -99,7 +100,8 @@ class Provider(PolymorphicModel):
 
 class RSSProvider(Provider):
     url = models.URLField()
-    summary_format = u"%(count)d new RSS items fetched from %(source)s"
+    summary_format = u"%(count)d new %(blip_name_plural)s fetched from %(source)s"
+    blip_name_plural=models.CharField(max_length=255, default="RSS items")
 
     def save(self, *args, **kwargs):
         """Automatically populate the name field using the RSS source, if one isn't provided on creation"""
@@ -129,8 +131,7 @@ class RSSProvider(Provider):
 
 
 class FlickrProvider(RSSProvider):
-    summary_format = u"%(count)d new images posted to %(source)s"
-
+    summary_format = u"%(count)d new %(blip_name_plural)s posted to %(source)s"
     def create_blip(self, entry):
         blip = super(FlickrProvider, self).create_blip(entry)
         blip.summary = entry.description
@@ -138,8 +139,7 @@ class FlickrProvider(RSSProvider):
 
 
 class BambooBuildsProvider(RSSProvider):
-    summary_format = u"%(count)d new builds ran in %(source)s"
-
+    summary_format = u"%(count)d new %(blip_name_plural)s ran in %(source)s"
     def create_blip(self, entry):
         blip = super(BambooBuildsProvider, self).create_blip(entry)
         blip.summary = None
@@ -147,8 +147,7 @@ class BambooBuildsProvider(RSSProvider):
 
 
 class KunenaProvider(RSSProvider):
-    summary_format = u"%(count)d new comments posted to %(source)s"
-
+    summary_format = u"%(count)d new %(blip_name_plural)s posted to %(source)s"
     def create_blip(self, entry):
         blip = super(KunenaProvider, self).create_blip(entry)
         strings = entry.title.rsplit(': ')
