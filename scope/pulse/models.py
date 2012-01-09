@@ -17,26 +17,22 @@ class BlipSet(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     tags = TaggableManager()
     provider = models.ForeignKey('Provider', null=True, on_delete=models.SET_NULL, related_name='blip_sets')
-    summary_format = models.TextField(editable=False, null=True)
-    source = models.CharField(max_length=255, editable=False, null=True)
+    summary = models.TextField(editable=False, null=True)
     class Meta:
         ordering = ['-timestamp']
 
     def __unicode__(self):
+        if self.provider is None:
+            # provider has been deleted, so use the prerendered text
+            return self.summary
         # the summary_args get string-formatted into the summary_format, so we can customize the
         # message that gets stored with the blipset
         # Note: if you edit this, make sure you update the help text for Provider.summary_format
         summary_args = {
             'count' : self.blips.count(),
+            'source' : self.provider.name,
         }
-        if self.provider is None:
-            # provider was deleted so use the locally-stored values
-            summary_args['source'] = self.source
-            summary_format = self.summary_format
-        else:
-            summary_args['source'] = self.provider.name
-            summary_format = self.provider.summary_format
-        return summary_format % summary_args
+        return self.provider.summary_format % summary_args
 
     @models.permalink
     def get_absolute_url(self):
@@ -199,12 +195,10 @@ class FileSystemChangeProvider(Provider):
 # signals, etc.
 
 
-def copy_provider_data_to_blipset(sender, **kwargs):
-    """Copy the Provider's summary information to all BlipSets referencing it
-
-    If a Provider gets deleted, we don't delete the existing BlipSets, so we need to back up the summary_format
-    and name so we can still render the BlipSet summary
-    """
+def prerender_blipsets(sender, **kwargs):
+    """Before we lose the provider, render all of the BlipSets referencing it"""
     provider = kwargs['instance']
-    provider.blip_sets.update(summary_format=provider.summary_format, source=provider.name)
-signals.pre_delete.connect(copy_provider_data_to_blipset, sender=Provider)
+    for bs in provider.blip_sets.all():
+        bs.summary = bs.__unicode__()
+        bs.save()
+signals.pre_delete.connect(prerender_blipsets, sender=Provider)
