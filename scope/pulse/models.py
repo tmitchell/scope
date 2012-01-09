@@ -4,6 +4,7 @@ import time
 
 import feedparser
 from django.db import models
+from django.db.models import signals
 from taggit.managers import TaggableManager
 
 from polymorphic import PolymorphicModel
@@ -14,13 +15,24 @@ logger = logging.getLogger(__name__)
 
 class BlipSet(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
-    summary = models.CharField(max_length=255)
     tags = TaggableManager()
+    provider = models.ForeignKey('Provider', null=True, editable=False, on_delete=models.SET_NULL, related_name='blip_sets')
+    summary = models.TextField(editable=False, null=True)
     class Meta:
         ordering = ['-timestamp']
 
     def __unicode__(self):
-        return self.summary
+        if self.provider is None:
+            # provider has been deleted, so use the prerendered text
+            return self.summary
+        # the summary_args get string-formatted into the summary_format, so we can customize the
+        # message that gets stored with the blipset
+        # Note: if you edit this, make sure you update the help text for Provider.summary_format
+        summary_args = {
+            'count' : self.blips.count(),
+            'source' : self.provider.name,
+        }
+        return self.provider.summary_format % summary_args
 
     @models.permalink
     def get_absolute_url(self):
@@ -44,13 +56,19 @@ class Provider(PolymorphicModel):
     update_frequency = models.IntegerField(verbose_name='Update Rate (mins)')
     name = models.CharField(max_length=255, blank=True)
     last_update = models.DateTimeField(editable=False, default=datetime.datetime(year=1900, month=1, day=1))
-    summary_format = u"%(count)d new items fetched from %(source)s"
+    summary_format = models.TextField(default=u"%(count)d new items fetched from %(source)s",
+                                      help_text=u"String-formatting indices you can use are `count` and `source`")
     tags = TaggableManager()
 
     def __unicode__(self):
         return self.name
 
     def update(self):
+        """Handles updating the provider and creating the Blipset for the activity
+
+        Keeps track of update rates to ensure we don't pummel the end services.  Also handles tagging all blips
+        that are created
+        """
         if (datetime.datetime.now() - self.last_update) < datetime.timedelta(minutes=self.update_frequency):
             logger.debug("Skipping update because we updated it recently")
             return
@@ -60,11 +78,9 @@ class Provider(PolymorphicModel):
             logger.debug("No new items found.")
             return
 
-        summary_args = { 'count' : len(blips), 'source' : self.name }
-        blipset = BlipSet()
-        blipset.summary = self.summary_format % summary_args
-        blipset.timestamp = max(blips, key=lambda b: b.timestamp)   # latest of all of the new blips
-        blipset.save()
+        blipset = BlipSet.objects.create(provider=self,
+                                         timestamp=max(blips, key=lambda b: b.timestamp),  # latest of all of the new blips
+        )
 
         # save blips
         for b in blips:
@@ -84,22 +100,23 @@ class Provider(PolymorphicModel):
         """Grab all of the blips to be created by this update
 
         Does not save them into the database, this way we can create/update the blipset in one place
+
+        Return value is an iterable containing the blips to be created during this update
         """
         raise NotImplementedError()
 
 
 class RSSProvider(Provider):
     url = models.URLField()
-    summary_format = u"%(count)d new RSS items fetched from %(source)s"
 
     def save(self, *args, **kwargs):
+        """Automatically populate the name field using the RSS source, if one isn't provided on creation"""
         if not self.name:
             content = feedparser.parse(self.url)
             try:
                 self.name = content['feed']['title']
             except KeyError:
                 self.name = self.url
-
         super(RSSProvider, self).save(*args, **kwargs)
 
     def _get_timestamp(self, entry):
@@ -116,15 +133,10 @@ class RSSProvider(Provider):
         return blips
 
     def create_blip(self, entry):
-        blip = Blip()
-        blip.title = entry.title
-        blip.source_url = entry.link
-        blip.timestamp = self._get_timestamp(entry)
-        return blip
+        return Blip(title=entry.title, source_url=entry.link, timestamp=self._get_timestamp(entry))
 
 
 class FlickrProvider(RSSProvider):
-    summary_format = u"%(count)d new images posted to %(source)s"
     def create_blip(self, entry):
         blip = super(FlickrProvider, self).create_blip(entry)
         blip.summary = entry.description
@@ -132,7 +144,6 @@ class FlickrProvider(RSSProvider):
 
 
 class BambooBuildsProvider(RSSProvider):
-    summary_format = u"%(count)d new builds ran in %(source)s"
     def create_blip(self, entry):
         blip = super(BambooBuildsProvider, self).create_blip(entry)
         blip.summary = None
@@ -140,18 +151,18 @@ class BambooBuildsProvider(RSSProvider):
 
 
 class KunenaProvider(RSSProvider):
-    summary_format = u"%(count)d new comments posted to %(source)s"
     def create_blip(self, entry):
         blip = super(KunenaProvider, self).create_blip(entry)
         strings = entry.title.rsplit(': ')
-        blip.title = strings[2] + " posted to teamseas.com"
+        # Todo: document what the format for these entries are
+        blip.title = "%s posted to %s" % (strings[2], self.name)
         blip.summary = strings[1][:-4]
         return blip
 
     
 class FileSystemChangeProvider(Provider):
     change_log_path = models.CharField(max_length=255)
-    source_url_root = models.CharField(max_length=255)
+    source_url_root = models.CharField(max_length=255, help_text=u'From the user perspective, where are these files found?')
     summary_format = u"%(count)d new filesystem changes fetched from %(source)s"
     verbify_dict = {
         "MODIFY" : "modified",
@@ -164,17 +175,30 @@ class FileSystemChangeProvider(Provider):
     def _fetch_blips(self):
         blips = []
         input = open(self.change_log_path, "r")
-        line = input.readline().strip()
-        while line:
-            line_items = line.rsplit('|')
-            # [        0        ]  [       1        ] [ 2  ] [3]
+        for line in input.readlines():
+            # extract the various bits from the log file, see Example line:
             #14:49:40 17:12:2011|/c/Administrative/|MODIFY|tmp
-            timestamp = datetime.datetime.strptime(line_items[0], "%H:%M:%S %d:%m:%Y")
-            if timestamp > self.last_update:
-                blip = Blip()
-                blip.source_url = '%s%s' % (self.source_url_root, line_items[3])
-                blip.title = '%s has been %s' % (line_items[3], self.verbify_dict[line_items[2]])
-                blip.timestamp = timestamp
+            (timestamp, path, action, filename) = line.strip().rsplit('|')
+            # convert to more friendly types/formats
+            timestamp = datetime.datetime.strptime(timestamp, "%H:%M:%S %d:%m:%Y")
+            action = self.verbify_dict[action]
+            if timestamp > self.last_update:        # make sure we don't import events we've already gotten
+                blip = Blip(
+                    source_url='%s%s' % (self.source_url_root, filename),
+                    title='%s has been %s' % (filename, action),
+                    timestamp=timestamp
+                )
                 blips.append(blip)
-            line = input.readline().strip()
         return blips
+
+
+# signals, etc.
+
+
+def prerender_blipsets(sender, **kwargs):
+    """Before we lose the provider, render all of the BlipSets referencing it"""
+    provider = kwargs['instance']
+    for bs in provider.blip_sets.all():
+        bs.summary = bs.__unicode__()
+        bs.save()
+signals.pre_delete.connect(prerender_blipsets, sender=Provider)
