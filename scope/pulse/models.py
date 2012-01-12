@@ -49,7 +49,7 @@ class Blip(PolymorphicModel):
         ordering = ['-timestamp']
 
     def __unicode__(self):
-        raise NotImplementedError()
+        return self.title
 
 
 class Provider(PolymorphicModel):
@@ -133,7 +133,8 @@ class RSSProvider(Provider):
         return blips
 
     def create_blip(self, entry):
-        return Blip(title=entry.title, source_url=entry.link, timestamp=self._get_timestamp(entry))
+        return Blip(title=entry.title, source_url=entry.link, summary=entry.summary,
+            timestamp=self._get_timestamp(entry))
 
 
 class FlickrProvider(RSSProvider):
