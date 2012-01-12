@@ -193,6 +193,32 @@ class FileSystemChangeProvider(Provider):
         return blips
 
 
+class GoogleDocsProvider(Provider):
+    auth_token = models.TextField()
+
+    def _fetch_blips(self):
+        from gdata.docs.client import DocsClient
+        from gdata.gauth import ClientLoginToken
+
+        blips = []
+        client = DocsClient(source='exoanalytic-exoscope-v1', auth_token=ClientLoginToken(self.auth_token))
+        for resource in client.GetAllResources():
+            atom = feedparser.parse(resource.ToString())
+            for entry in atom.entries:
+                # TODO: these are in UTC, so we'll be updating more than we should
+                timestamp = datetime.datetime.fromtimestamp(time.mktime(entry.updated_parsed))
+                if timestamp > self.last_update:
+                    blip = Blip(
+                        source_url=entry.link,
+                        title=entry.title,
+                        # TODO: this isn't actually the editor
+                        summary="%(title)s edited by %(author)s" % entry,
+                        timestamp=timestamp,
+                    )
+                    blips.append(blip)
+        return blips
+
+
 # signals, etc.
 
 
