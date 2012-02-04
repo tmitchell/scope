@@ -1,5 +1,5 @@
 # Project
-Django==1.3.1
+-e git+https://github.com/django/django.git@7bf3241792e39bb90f43ac31e06b00d234b1f117#egg=django-dev
 South==0.7.3
 psycopg2==2.4.3
 wsgiref==0.1.2
