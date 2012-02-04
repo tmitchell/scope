@@ -39,7 +39,7 @@ class BlipSet(models.Model):
         return 'blipset_detail', [str(self.pk)]
 
 
-class Blip(PolymorphicModel):
+class Blip(models.Model):
     source_url = models.URLField()
     title = models.TextField()
     summary = models.TextField(null=True)
