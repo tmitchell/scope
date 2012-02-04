@@ -3,11 +3,5 @@
 {% block page-title %}{{ blip }}{% endblock %}
 
 {% block page-content %}
-    <p>
-        <strong>{{ blip.timestamp }}</strong><br />
-        <strong><a href="{{ blip.source_url }}">{{ blip.title }}</a></strong><br/>
-        {% if blip.summary %}
-          {{ blip.summary|safe }}
-        {% endif %}
-    </p>
+    {% include "pulse/includes/blip.txt" %}
 {% endblock %}
