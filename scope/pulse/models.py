@@ -194,14 +194,34 @@ class FileSystemChangeProvider(Provider):
 
 
 class GoogleDocsProvider(Provider):
-    auth_token = models.TextField()
+    email = models.EmailField(max_length=255, blank=True, null=True)
+    password = models.CharField(max_length=255, blank=True, null=True)
+    auth_token = models.TextField(blank=True)
+    # non-ORM fields, keeping it DRY
+    application_name = 'exoanalytic-exoscope-v1'
+
+    def save(self, *args, **kwargs):
+        """If password is set, login and generate the auth token, then trash the password"""
+        if self.password:
+            from gdata.docs import service
+            client = service.DocsService()
+            client.ClientLogin(self.email, self.password, source=self.application_name)
+
+            # store the auth token and remove the password
+            self.auth_token = client.current_token.get_token_string()
+            self.password = None
+
+        super(GoogleDocsProvider, self).save(*args, **kwargs)
 
     def _fetch_blips(self):
+        assert self.auth_token, "auth_token must be set before we can fetch %s blips.  " \
+                                "Please set username and password via the admin" % self.__class__.__name__ \
+
         from gdata.docs.client import DocsClient
         from gdata.gauth import ClientLoginToken
 
         blips = []
-        client = DocsClient(source='exoanalytic-exoscope-v1', auth_token=ClientLoginToken(self.auth_token))
+        client = DocsClient(source=self.application_name, auth_token=ClientLoginToken(self.auth_token))
         for resource in client.GetAllResources():
             atom = feedparser.parse(resource.ToString())
             for entry in atom.entries:
