@@ -1,12 +1,12 @@
 # Project
-Django==1.3.1
+-e git+https://github.com/django/django.git@7bf3241792e39bb90f43ac31e06b00d234b1f117#egg=django-dev
 South==0.7.3
 psycopg2==2.4.3
 wsgiref==0.1.2
 django-polymorphic==0.2
 feedparser==5.1
 pytz==2011n
-django-filter==0.5.3
+-e git+https://github.com/alex/django-filter.git@51b39fca089f2cb1d3d3501d2e164635fbe52864#egg=django_filter-dev
 -e git+https://github.com/tzangms/django-bootstrap-form.git@5518ac1c2e3fc64b549621d4f558256123c71382#egg=django_bootstrap_form-dev
 django-taggit==0.9.3
 django-taggit-templatetags==0.4.6dev
