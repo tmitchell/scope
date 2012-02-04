@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>{% block title %}ExoScope - Keeping the pulse of the company{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
 
@@ -12,29 +13,38 @@
     <![endif]-->
 
     <!-- Le styles -->
-    <link href="{{ STATIC_URL }}bootstrap/lib/bootstrap.less" rel="stylesheet/less">
-    <link href="{{ STATIC_URL }}css/project.css" rel="stylesheet">
+    <!-- Note that these are all rel="stylesheet/less" so the styles get applied in the right order -->
+    <link href="{{ STATIC_URL }}bootstrap/less/bootstrap.less" rel="stylesheet/less">
+    <!--<link href="{{ STATIC_URL }}bootstrap/less/responsive.less" rel="stylesheet/less">-->
+    <link href="{{ STATIC_URL }}bootstrap/docs/assets/css/docs.css" rel="stylesheet/less">
+    <link href="{{ STATIC_URL }}css/project.css" rel="stylesheet/less">
 
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="images/favicon.ico">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
     <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
     <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
-
-    <!-- LESS -->
-    <script src="{{ STATIC_URL }}js/less-1.2.1.min.js"></script>
   </head>
 
-  <body>
-    <div class="topbar">
-      <div class="fill">
+  <body data-spy="scroll" data-target=".subnav" data-offset="50">
+
+  <!-- Navbar
+    ================================================== -->
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
         <div class="container">
-          <a class="brand" href="#">ExoScope</a>
-          <ul class="nav">
-            <li><a href="{% url home %}">Home</a></li>
-            <li><a href="{% url timeline %}">Timeline</a></li>
-            <li><a href="{% url admin:index %}">Admin</a></li>
-          </ul>
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="{% url home %}">ExoScope</a>
+          <div class="nav-collapse">
+              <ul class="nav">
+                <li><a href="{% url timeline %}">Timeline</a></li>
+                <li><a href="{% url admin:index %}">Admin</a></li>
+              </ul>
+          </div>
           <!--<form action="" class="pull-right">-->
             <!--<input class="input-small" type="text" placeholder="Username">-->
             <!--<input class="input-small" type="password" placeholder="Password">-->
@@ -46,31 +56,39 @@
 
     <div class="container">
 
-      <div class="content">
-        <div class="page-header">
-          <h1>{% block page-header %}<img id="banner" alt="ExoScope" src="{{ STATIC_URL }}img/banner.png" width=150 height=50>
-              <small>Keeping the pulse of the company</small>{% endblock %}
-          </h1>
-        </div>
+    <!-- Masthead
+      ================================================== -->
+      <header class="jumbotron subhead" id="overview">
+        <h1><img id="banner" alt="ExoScope" src="{{ STATIC_URL }}img/banner.png" width=150 height=50></h1>
+        <p class="lead">Keeping the pulse of the company</p>
+      </header>
+
+      <section id="main-content">
         <div class="row">
-          <div class="span10">
+          <div class="span9">
             <h2>{% block page-title %}Title{% endblock %}</h2>
             {% block page-content %}
             {% endblock %}
           </div>
-          <div class="span4">
+          <div class="span3">
             <h3>{% block side-title %}Sidebar{% endblock %}</h3>
             {% block side-content %}
             {% endblock %}
           </div>
         </div>
-      </div>
+      </section>
 
-      <footer>
+      <footer class="footer">
+        <p class="pull-right"><a href="#">Back to top</a></p>
         <p>&copy; ExoAnalytic Solutions, Inc. 2011</p>
       </footer>
 
     </div> <!-- /container -->
+
+  <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="{{ STATIC_URL }}js/less-1.2.1.min.js"></script>
 
   </body>
 </html>
