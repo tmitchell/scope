@@ -17,7 +17,6 @@
 
       <div class="row">
         <div class="span9">
-          <h2></h2>
           {% for blipset in object_list %}
             {% get_daily_timestamp blipset.timestamp as timestamp %}
             {% if timestamp %}
@@ -37,7 +36,7 @@
 
         <div class="span3">
           {% block side-content %}
-            <h4>Tag Cloud</h4>
+            <h3>Tag Cloud</h3>
             <div class="well">
               {% get_tagcloud as tags for 'pulse.BlipSet' %}
               {% for tag in tags %}
