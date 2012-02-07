@@ -1,5 +1,7 @@
 {% extends "pulse/blipset_list.html" %}{% load bootstrap %}
 
+{% block title %} {{ block.super }} | Timeline {% endblock %}
+
 {% block main-container %}
     {% with filter as object_list %}
         {{ block.super }}

@@ -1,5 +1,9 @@
 {% extends "base.html" %}{% load taggit_extras %}{% load pulse_extras %}
 
+{% block title %}
+    {{ block.super }} | BlipSets {% if tag %}| {{ tag }} {% endif %}
+{% endblock %}
+
 {% block main-container %}
     <section id="blipset-list">
       <div class="page-header">

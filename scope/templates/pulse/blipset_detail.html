@@ -1,15 +1,6 @@
 {% extends "base.html" %}{% load pulse_extras %}
 
-{% block page-title %}{% endblock %}
-{% block page-content %}
-
-{% endblock %}
-
-{% block side-title %}Metadata{% endblock %}
-{% block side-content %}
-
-{% endblock %}
-
+{% block title %}{{ block.super }} | BlipSet{% endblock %}
 
 {% block main-container %}
   <section id="blip-detail">
