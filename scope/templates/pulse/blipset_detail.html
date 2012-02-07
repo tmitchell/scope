@@ -6,10 +6,16 @@
   <section id="blip-detail">
     <div class="page-header">
       <h1>{{ blipset }}</h1>
+        {% if blipset.tags.exists %}
+          <i class="icon-tags"></i>
+          {% for tag in blipset.tags.all %}
+            <span class="label"><a href="{% url blipset_tags tag.slug %}">{{ tag }}</a></span>
+          {% endfor %}
+        {% endif %}
     </div>
 
     <div class="row">
-      <div class="span9">
+      <div class="span12">
         {% for blip in blipset.blips.all %}
           {% get_daily_timestamp blip.timestamp as timestamp %}
           {% if timestamp %}
@@ -18,17 +24,6 @@
 
           {% include "pulse/includes/blip.txt" %}
         {% endfor %}
-      </div>
-
-      <div class="span3">
-        <h3>Tags</h3>
-        <ul>
-          {% for tag in blipset.tags.all %}
-            <li>
-              <a href="{% url blipset_tags tag.slug %}">{{ tag }}</a>
-            </li>
-          {% endfor %}
-        </ul>
       </div>
     </div> <!-- row -->
   </section>

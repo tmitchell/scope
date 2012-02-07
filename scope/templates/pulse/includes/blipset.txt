@@ -1,9 +1,12 @@
 <h4><a href="{{ blipset.get_absolute_url }}">{{ blipset }}</a></h4>
 <p>
-    <em>{{ blipset.timestamp }}</em>
+
     {% if blipset.tags.exists %}
+      <i class="icon-tags"></i>
       {% for tag in blipset.tags.all %}
         <span class="label"><a href="{% url blipset_tags tag.slug %}">{{ tag }}</a></span>
       {% endfor %}
+      <br />
     {% endif %}
+    <em>{{ blipset.timestamp }}</em><br />
 </p>

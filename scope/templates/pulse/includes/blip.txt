@@ -1,7 +1,14 @@
 <p>
+    <a href="{% url blip_detail blip.pk %}"><i class="icon-file"></i></a>
     <strong>{{ blip.timestamp }}</strong><br />
     <strong><a href="{{ blip.source_url }}">{{ blip.title }}</a></strong><br/>
-    {% if blip.summary %}
-      {{ blip.summary|safe }}
+    {% if blip.tags.exists %}
+      <i class="icon-tags"></i>
+      {% for tag in blip.tags.all %}
+        <span class="label"><a href="{% url blipset_tags tag.slug %}">{{ tag }}</a></span>
+      {% endfor %}
     {% endif %}
 </p>
+{% if blip.summary %}
+  <p>{{ blip.summary|safe }}</p>
+{% endif %}
