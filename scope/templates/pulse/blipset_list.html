@@ -17,7 +17,11 @@
 
       <div class="row">
         <div class="span9">
-            {% for blipset in object_list %}
+          {% if object_list.exists %}{% else %}
+            No matching updates found
+          {% endif %}
+
+          {% for blipset in object_list %}
             {% ifequal blipset.blips.count 1 %}
                 {% with blipset.blips.all|first as blip %}
                     {% get_daily_timestamp blip.timestamp as timestamp %}
@@ -34,8 +38,8 @@
                 {% endif %}
                 {% include "pulse/includes/blipset.txt" %}
             {% endifequal %}
-
           {% endfor %}
+
         </div> <!-- span9 -->
 
         <div class="span3">

@@ -3,7 +3,7 @@
 {% block title %} {{ block.super }} | Timeline {% endblock %}
 
 {% block main-container %}
-    {% with filter as object_list %}
+    {% with filter.qs as object_list %}
         {{ block.super }}
     {% endwith %}
 {% endblock %}
