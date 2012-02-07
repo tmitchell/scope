@@ -13,6 +13,7 @@ SITE_ID = 1
 
 USE_I18N = True
 USE_L10N = True
+USE_TZ = True
 
 MEDIA_URL = '/site-media/m/'
 STATIC_URL = '/site-media/s/'
