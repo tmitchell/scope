@@ -10,5 +10,5 @@ urlpatterns = patterns('',
     url(r'^timeline$', Timeline.as_view(), name='timeline'),
     url(r'^(?P<slug>\w+)$', DetailView.as_view(model=BlipSet, slug_field='pk'), name='blipset_detail'),
     url(r'^blip/(?P<slug>\w+)$', DetailView.as_view(model=Blip, slug_field='pk'), name='blip_detail'),
-    url(r'^tags/(?P<slug>\w+)$', tagged_object_list, {'queryset' : BlipSet.objects.all()}, name='blipset_tags'),
+    url(r'^tags/(?P<slug>[A-Za-z0-9_\-]+)$', tagged_object_list, {'queryset' : BlipSet.objects.all()}, name='blipset_tags'),
 )
