@@ -1,7 +1,30 @@
+<h3>
+<a href="{{ blip.source_url }}">{{ blip.title }}</a>
+{% if blip.who %}
+  by {{ blip.who }}
+{% endif %}
+</h3>
+
 <p>
-    <strong>{{ blip.timestamp }}</strong><br />
-    <strong><a href="{{ blip.source_url }}">{{ blip.title }}</a></strong><br/>
-    {% if blip.summary %}
-      {{ blip.summary|safe }}
-    {% endif %}
+  {% if blip.tags.exists %}
+    {% for tag in blip.tags.all %}
+      <span class="label label"><a href="{% url blip_tags tag.slug %}">{{ tag }}</a></span>
+    {% endfor %}
+  {% endif %}
+</p>
+
+{% if blip.summary %}
+  <p>{{ blip.summary|safe }}</p>
+{% endif %}
+<p>
+    <em>
+      {{ blip.timestamp }}
+      {% if blip.blipset.provider %}
+        via {{ blip.blipset.provider }}
+      {% endif %}
+    </em>
+</p>
+<p>
+    <a href="{% url blip_detail blip.pk %}"><i class="icon-bookmark"></i>Link</a>
+    <a href="{{ blip.source_url }}"><i class="icon-cog"></i>Original</a>
 </p>

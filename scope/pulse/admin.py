@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from pulse import forms
 from pulse.models import (BlipSet, RSSProvider, FlickrProvider, BambooBuildsProvider,
-                          KunenaProvider, FileSystemChangeProvider, GoogleDocsProvider)
+                          KunenaProvider, TracTimelineProvider, FileSystemChangeProvider, GoogleDocsProvider)
 
 
 class PasswordModelAdmin(admin.ModelAdmin):
@@ -21,5 +21,6 @@ admin.site.register(RSSProvider)
 admin.site.register(FlickrProvider)
 admin.site.register(BambooBuildsProvider)
 admin.site.register(KunenaProvider)
+admin.site.register(TracTimelineProvider)
 admin.site.register(FileSystemChangeProvider)
 admin.site.register(GoogleDocsProvider, PasswordModelAdmin)
