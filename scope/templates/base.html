@@ -40,7 +40,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="compose btn btn-primary" data-toggle="modal" href="#myModal"><i class="icon-pencil icon-white"></i></a>
+          <a id="compose" class="tt-bottom btn btn-primary" title="Compose new Blip" data-toggle="modal" href="#myModal"><i class="icon-comment icon-white"></i></a>
           <a class="brand" href="{% url home %}">ExoScope</a>
           <div class="nav-collapse">
               <ul class="nav">
@@ -78,7 +78,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Save changes</button>
-                    <button type="reset" class="btn" data-dismiss="modal">Close</button>
+                    <button class="btn" data-dismiss="modal">Close</button>
                 </div>
             </form>
         </div>
@@ -91,6 +91,8 @@
     <script src="{{ STATIC_URL }}js/less-1.2.1.min.js"></script>
     <script src="{{ STATIC_URL }}js/jquery.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap-modal.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-tooltip.js"></script>
+    <script src="{{ STATIC_URL }}js/project.js"></script>
 
   </body>
 </html>

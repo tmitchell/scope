@@ -37,7 +37,7 @@ body {
 
 /* Tweak navbar compose button
 -------------------------------------------------- */
-.navbar-fixed-top .compose {
+.navbar-fixed-top #compose {
   margin-left: 10px;
   float: right;
 }
