@@ -8,7 +8,7 @@
 <p>
   {% if blip.tags.exists %}
     {% for tag in blip.tags.all %}
-      <span class="label"><a href="{% url blipset_tags tag.slug %}">{{ tag }}</a></span>
+      <span class="label label"><a href="{% url blip_tags tag.slug %}">{{ tag }}</a></span>
     {% endfor %}
   {% endif %}
 </p>

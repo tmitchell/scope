@@ -1,0 +1,44 @@
+{% extends "base.html" %}{% load taggit_extras %}{% load pulse_extras %}
+
+{% block title %}
+    {{ block.super }} | Blips {% if tag %}| {{ tag }} {% endif %}
+{% endblock %}
+
+{% block main-container %}
+    <section id="blip-list">
+      <div class="page-header">
+        <h1>
+          {% block page-title %}
+            Blips
+            {% if tag %}tagged <a href="{% url blip_tags tag.slug %}">{{ tag }}</a>{% endif %}
+          {% endblock %}
+        </h1>
+      </div>
+
+      <div class="row">
+        <div class="span9">
+          {% for blip in object_list %}
+            {% get_daily_timestamp blip.timestamp as timestamp %}
+            {% if timestamp %}
+                <h2>{{ timestamp|date:"l, M d Y" }}</h2>
+            {% endif %}
+            {% include "pulse/includes/blip.txt" %}
+          {% endfor %}
+        </div> <!-- span9 -->
+
+        <div class="span3">
+          {% block side-content %}
+            <h3>Tag Cloud</h3>
+            <div class="well">
+              {% get_tagcloud as tags for 'pulse.Blip' %}
+              {% for tag in tags %}
+                <span style="font-size:{{ tag.weight|floatformat:0 }}px;"> <a href="{% url blip_tags tag.slug %}">{{ tag }}</a></span>
+              {% endfor %}
+            </div>
+          {% endblock %}
+        </div> <!-- span3 -->
+      </div> <!-- row -->
+    </section>
+{% endblock %}
+
+
