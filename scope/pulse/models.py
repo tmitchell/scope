@@ -38,6 +38,10 @@ class BlipSet(models.Model):
     def get_absolute_url(self):
         return 'blipset_detail', [str(self.pk)]
 
+    def authors(self):
+        """Return all of the unique authors in the blipset"""
+        return sorted(set([b.who for b in self.blips.all() if b.who]))
+
 
 class Blip(models.Model):
     source_url = models.URLField()
