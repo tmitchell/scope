@@ -241,19 +241,30 @@ class GoogleDocsProvider(Provider):
         blips = []
         client = DocsClient(source=self.application_name, auth_token=ClientLoginToken(self.auth_token))
         for resource in client.GetAllResources():
-            atom = feedparser.parse(resource.ToString())
-            for entry in atom.entries:
+            # convert the resource to something we can handle (e.g feedparser data)
+            resource_atom = feedparser.parse(resource.ToString())
+            assert len(resource_atom.entries) == 1, "We assume there is only one entry for each document currently"
+            resource_atom = resource_atom.entries[0]
+
+            revision_feed = client.get_revisions(resource)
+            revision_atom = feedparser.parse(revision_feed.ToString())
+            for revision in revision_atom.entries:
                 # TODO: these are in UTC, so we'll be updating more than we should
-                timestamp = datetime.datetime.fromtimestamp(time.mktime(entry.updated_parsed))
-                if timestamp > self.last_update:
-                    blip = Blip(
-                        source_url=entry.link,
-                        title=entry.title,
-                        # TODO: this isn't actually the editor
-                        summary="%(title)s edited by %(author)s" % entry,
-                        timestamp=timestamp,
-                    )
-                    blips.append(blip)
+                timestamp = datetime.datetime.fromtimestamp(time.mktime(revision.updated_parsed))
+                try:
+                    if timestamp > self.last_update:
+                        blip = Blip(
+                            source_url=revision.link,
+                            title=resource_atom.title,
+                            # TODO: this isn't actually the editor
+                            summary="%(title)s edited" % resource_atom,
+                            timestamp=timestamp,
+                            who=revision.author,
+                        )
+                        blips.append(blip)
+                except:
+                    import pdb
+                    pdb.set_trace()
         return blips
 
 
