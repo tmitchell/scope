@@ -251,20 +251,15 @@ class GoogleDocsProvider(Provider):
             for revision in revision_atom.entries:
                 # TODO: these are in UTC, so we'll be updating more than we should
                 timestamp = datetime.datetime.fromtimestamp(time.mktime(revision.updated_parsed))
-                try:
-                    if timestamp > self.last_update:
-                        blip = Blip(
-                            source_url=revision.link,
-                            title=resource_atom.title,
-                            # TODO: this isn't actually the editor
-                            summary="%(title)s edited" % resource_atom,
-                            timestamp=timestamp,
-                            who=revision.author,
-                        )
-                        blips.append(blip)
-                except:
-                    import pdb
-                    pdb.set_trace()
+                if timestamp > self.last_update:
+                    blip = Blip(
+                        source_url=revision.link,
+                        title=resource_atom.title,
+                        summary="%(title)s edited" % resource_atom,
+                        timestamp=timestamp,
+                        who=revision.author,
+                    )
+                    blips.append(blip)
         return blips
 
 
