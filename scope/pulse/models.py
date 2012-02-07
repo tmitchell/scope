@@ -43,6 +43,7 @@ class Blip(models.Model):
     source_url = models.URLField()
     title = models.TextField()
     summary = models.TextField(null=True)
+    who = models.CharField(max_length=255, null=True)
     timestamp = models.DateTimeField()
     tags = TaggableManager(blank=True)
     blipset = models.ForeignKey(BlipSet, related_name='blips', null=True)
@@ -167,6 +168,10 @@ class TracTimelineProvider(RSSProvider):
         blip = super(TracTimelineProvider, self).create_blip(entry)
         tags = [t['term'] for t in entry.tags]
         blip.tags.add(*tags)
+        try:
+            blip.who = entry.author_detail['name']
+        except (AttributeError, KeyError):
+            pass
         return blip
 
     

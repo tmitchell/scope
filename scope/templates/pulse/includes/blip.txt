@@ -1,4 +1,10 @@
-<h3><a href="{{ blip.source_url }}">{{ blip.title }}</a></h3>
+<h3>
+<a href="{{ blip.source_url }}">{{ blip.title }}</a>
+{% if blip.who %}
+  by {{ blip.who }}
+{% endif %}
+</h3>
+
 <p>
   {% if blip.tags.exists %}
     {% for tag in blip.tags.all %}
