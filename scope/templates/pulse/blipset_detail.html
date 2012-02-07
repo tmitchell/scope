@@ -19,7 +19,7 @@
         {% for blip in blipset.blips.all %}
           {% get_daily_timestamp blip.timestamp as timestamp %}
           {% if timestamp %}
-            <h3>{{ timestamp|date:"l, M d Y" }}</h3>
+            <h2>{{ timestamp|date:"l, M d Y" }}</h2>
           {% endif %}
 
           {% include "pulse/includes/blip.txt" %}

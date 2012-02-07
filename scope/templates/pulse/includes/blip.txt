@@ -1,14 +1,24 @@
+<h3><a href="{{ blip.source_url }}">{{ blip.title }}</a></h3>
 <p>
-    <a href="{% url blip_detail blip.pk %}"><i class="icon-file"></i></a>
-    <strong>{{ blip.timestamp }}</strong><br />
-    <strong><a href="{{ blip.source_url }}">{{ blip.title }}</a></strong><br/>
-    {% if blip.tags.exists %}
-      <i class="icon-tags"></i>
-      {% for tag in blip.tags.all %}
-        <span class="label"><a href="{% url blipset_tags tag.slug %}">{{ tag }}</a></span>
-      {% endfor %}
-    {% endif %}
+  {% if blip.tags.exists %}
+    {% for tag in blip.tags.all %}
+      <span class="label"><a href="{% url blipset_tags tag.slug %}">{{ tag }}</a></span>
+    {% endfor %}
+  {% endif %}
 </p>
+
 {% if blip.summary %}
   <p>{{ blip.summary|safe }}</p>
 {% endif %}
+<p>
+    <em>
+      {{ blip.timestamp }}
+      {% if blip.blipset.provider %}
+        via {{ blip.blipset.provider }}
+      {% endif %}
+    </em>
+</p>
+<p>
+    <a href="{% url blip_detail blip.pk %}"><i class="icon-bookmark"></i>Link</a>
+    <a href="{{ blip.source_url }}"><i class="icon-cog"></i>Original</a>
+</p>

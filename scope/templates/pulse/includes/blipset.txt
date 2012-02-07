@@ -1,6 +1,5 @@
 <h4><a href="{{ blipset.get_absolute_url }}">{{ blipset }}</a></h4>
 <p>
-
     {% if blipset.tags.exists %}
       <i class="icon-tags"></i>
       {% for tag in blipset.tags.all %}
