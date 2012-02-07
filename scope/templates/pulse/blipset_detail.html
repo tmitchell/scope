@@ -1,31 +1,35 @@
 {% extends "base.html" %}{% load pulse_extras %}
 
-{% block page-title %}{{ blipset }}{% endblock %}
-{% block page-content %}
-    {% for blip in blipset.blips.all %}
-        {% get_daily_timestamp blip.timestamp as timestamp %}
-        {% if timestamp %}
+{% block title %}{{ block.super }} | BlipSet{% endblock %}
+
+{% block main-container %}
+  <section id="blip-detail">
+    <div class="page-header">
+      <h1>{{ blipset }}</h1>
+    </div>
+
+    <div class="row">
+      <div class="span9">
+        {% for blip in blipset.blips.all %}
+          {% get_daily_timestamp blip.timestamp as timestamp %}
+          {% if timestamp %}
             <h3>{{ timestamp|date:"l, M d Y" }}</h3>
-        {% endif %}
+          {% endif %}
 
-        <p>
-            <strong>{{ blip.timestamp }}</strong><br />
-            <strong><a href="{{ blip.source_url }}">{{ blip.title }}</a></strong><br/>
-            {% if blip.summary %}
-              {{ blip.summary|safe }}
-            {% endif %}
-        </p>
-    {% endfor %}
-{% endblock %}
-
-{% block side-title %}Metadata{% endblock %}
-{% block side-content %}
-    <h4>Tags</h4>
-    <ul>
-        {% for tag in blipset.tags.all %}
-        <li>
-            <a href="{% url blipset_tags tag.slug %}">{{ tag }}</a>
-        </li>
+          {% include "pulse/includes/blip.txt" %}
         {% endfor %}
-    </ul>
+      </div>
+
+      <div class="span3">
+        <h3>Tags</h3>
+        <ul>
+          {% for tag in blipset.tags.all %}
+            <li>
+              <a href="{% url blipset_tags tag.slug %}">{{ tag }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div> <!-- row -->
+  </section>
 {% endblock %}

@@ -1,3 +1,4 @@
+from bootstrap.forms import BootstrapForm
 import django_filters
 from django import forms
 from django.contrib.contenttypes.models import ContentType
@@ -13,10 +14,11 @@ class BlipSetFilterSet(django_filters.FilterSet):
     class Meta:
         model = BlipSet
         fields = ['timestamp']
+        form = BootstrapForm
 
     def __init__(self, *args, **kwargs):
         super(BlipSetFilterSet, self).__init__(*args, **kwargs)
-        self.filters['timestamp'].widget = forms.Select(attrs={'class':'span3'})
+        self.filters['timestamp'].widget = forms.Select(attrs={'class':'span2'})
 
 
 class Timeline(View, TemplateResponseMixin):

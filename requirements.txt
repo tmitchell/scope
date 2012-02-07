@@ -7,7 +7,7 @@ django-polymorphic==0.2
 feedparser==5.1
 pytz==2011n
 -e git+https://github.com/alex/django-filter.git@51b39fca089f2cb1d3d3501d2e164635fbe52864#egg=django_filter-dev
--e git+https://github.com/tzangms/django-bootstrap-form.git@5518ac1c2e3fc64b549621d4f558256123c71382#egg=django_bootstrap_form-dev
+-e git://github.com/earle/django-bootstrap.git@484837e9cfcae64ba6f0ee06acbd547648f0cca8#egg=bootstrap-dev
 django-taggit==0.9.3
 django-taggit-templatetags==0.4.6dev
 django-templatetag-sugar==0.1
