@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class BlipSet(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
-    tags = TaggableManager()
+    tags = TaggableManager(blank=True)
     provider = models.ForeignKey('Provider', null=True, editable=False, on_delete=models.SET_NULL, related_name='blip_sets')
     summary = models.TextField(editable=False, null=True)
     class Meta:
@@ -44,7 +44,8 @@ class Blip(models.Model):
     title = models.TextField()
     summary = models.TextField(null=True)
     timestamp = models.DateTimeField()
-    blipset = models.ForeignKey(BlipSet, related_name='blips')
+    tags = TaggableManager(blank=True)
+    blipset = models.ForeignKey(BlipSet, related_name='blips', null=True)
     class Meta:
         ordering = ['-timestamp']
 
@@ -133,7 +134,7 @@ class RSSProvider(Provider):
         return blips
 
     def create_blip(self, entry):
-        return Blip(title=entry.title, source_url=entry.link, summary=entry.summary,
+        return Blip.objects.create(title=entry.title, source_url=entry.link, summary=entry.summary,
             timestamp=self._get_timestamp(entry))
 
 
@@ -158,6 +159,14 @@ class KunenaProvider(RSSProvider):
         # Todo: document what the format for these entries are
         blip.title = "%s posted to %s" % (strings[2], self.name)
         blip.summary = strings[1][:-4]
+        return blip
+
+
+class TracTimelineProvider(RSSProvider):
+    def create_blip(self, entry):
+        blip = super(TracTimelineProvider, self).create_blip(entry)
+        tags = [t['term'] for t in entry.tags]
+        blip.tags.add(*tags)
         return blip
 
     
