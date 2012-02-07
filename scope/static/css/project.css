@@ -35,6 +35,12 @@ body {
   text-decoration: none;
 }
 
+/* Tweak navbar compose button
+-------------------------------------------------- */
+.navbar-fixed-top #compose {
+  margin-left: 10px;
+  float: right;
+}
 
 /* Space out sub-sections more
 -------------------------------------------------- */
