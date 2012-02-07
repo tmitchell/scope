@@ -55,28 +55,8 @@
     </div>
 
     <div class="container">
-
-    <!-- Masthead
-      ================================================== -->
-      <header class="jumbotron subhead" id="overview">
-        <h1><img id="banner" alt="ExoScope" src="{{ STATIC_URL }}img/banner.png" width=150 height=50></h1>
-        <p class="lead">Keeping the pulse of the company</p>
-      </header>
-
-      <section id="main-content">
-        <div class="row">
-          <div class="span9">
-            <h2>{% block page-title %}Title{% endblock %}</h2>
-            {% block page-content %}
-            {% endblock %}
-          </div>
-          <div class="span3">
-            <h3>{% block side-title %}Sidebar{% endblock %}</h3>
-            {% block side-content %}
-            {% endblock %}
-          </div>
-        </div>
-      </section>
+      {% block main-container %}
+      {% endblock %}
 
       <footer class="footer">
         <p class="pull-right"><a href="#">Back to top</a></p>

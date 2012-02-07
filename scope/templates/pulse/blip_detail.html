@@ -1,7 +1,15 @@
 {% extends "base.html" %}{% load pulse_extras %}
 
-{% block page-title %}{{ blip }}{% endblock %}
+{% block main-container %}
+  <section id="blip-detail">
+    <div class="page-header">
+      <h1>{{ blip }}</h1>
+    </div>
 
-{% block page-content %}
-    {% include "pulse/includes/blip.txt" %}
+    <div class="row">
+        <div class="span12">
+          {% include "pulse/includes/blip.txt" %}
+        </div>
+    </div> <!-- row -->
+  </section>
 {% endblock %}

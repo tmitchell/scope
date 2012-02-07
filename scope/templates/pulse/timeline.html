@@ -1,14 +1,15 @@
 {% extends "pulse/blipset_list.html" %}{% load bootstrap %}
 
-{% block page-title %}Timeline{% endblock %}
-{% block page-content %}
+{% block main-container %}
     {% with filter as object_list %}
         {{ block.super }}
     {% endwith %}
 {% endblock %}
 
-{% block side-title %}Filter Timeline{% endblock %}
+{% block page-title %}Timeline{% endblock %}
+
 {% block side-content %}
+    <h3>Filter Timeline</h3>
      <form action="" method="get" class="form-stacked">
          {{ filter.form|bootstrap }}
          {{ tag_filter_form|bootstrap }}
