@@ -5,6 +5,7 @@ import time
 import feedparser
 from django.db import models
 from django.db.models import signals
+from django.utils.timezone import get_default_timezone, now, utc
 from taggit.managers import TaggableManager
 
 from polymorphic import PolymorphicModel
@@ -57,11 +58,15 @@ class Blip(models.Model):
     def __unicode__(self):
         return self.title
 
+    @models.permalink
+    def get_absolute_url(self):
+        return 'blip_detail', [str(self.pk)]
+
 
 class Provider(PolymorphicModel):
     update_frequency = models.IntegerField(verbose_name='Update Rate (mins)')
     name = models.CharField(max_length=255, blank=True)
-    last_update = models.DateTimeField(editable=False, default=datetime.datetime(year=1900, month=1, day=1))
+    last_update = models.DateTimeField(editable=False, default=datetime.datetime(year=1900, month=1, day=1, tzinfo=get_default_timezone()))
     summary_format = models.TextField(default=u"%(count)d new items fetched from %(source)s",
                                       help_text=u"String-formatting indices you can use are `count` and `source`")
     tags = TaggableManager()
@@ -75,7 +80,7 @@ class Provider(PolymorphicModel):
         Keeps track of update rates to ensure we don't pummel the end services.  Also handles tagging all blips
         that are created
         """
-        if (datetime.datetime.now() - self.last_update) < datetime.timedelta(minutes=self.update_frequency):
+        if (now() - self.last_update) < datetime.timedelta(minutes=self.update_frequency):
             logger.debug("Skipping update because we updated it recently")
             return
 
@@ -99,7 +104,7 @@ class Provider(PolymorphicModel):
 
         logger.debug(blipset)
 
-        self.last_update = datetime.datetime.now()
+        self.last_update = now()
         self.save()
 
     def _fetch_blips(self):
@@ -127,7 +132,7 @@ class RSSProvider(Provider):
 
     def _get_timestamp(self, entry):
         """Convert the given RSS entry timestamp into a Python datetime compatible with our DB"""
-        return datetime.datetime.fromtimestamp(time.mktime(entry.updated_parsed))
+        return datetime.datetime.fromtimestamp(time.mktime(entry.updated_parsed)).replace(tzinfo=utc)
 
     def _fetch_blips(self):
         blips = []
@@ -249,15 +254,14 @@ class GoogleDocsProvider(Provider):
             revision_feed = client.get_revisions(resource)
             revision_atom = feedparser.parse(revision_feed.ToString())
             for revision in revision_atom.entries:
-                # TODO: these are in UTC, so we'll be updating more than we should
-                timestamp = datetime.datetime.fromtimestamp(time.mktime(revision.updated_parsed))
+                timestamp = datetime.datetime.utcfromtimestamp(time.mktime(revision.updated_parsed))
                 if timestamp > self.last_update:
                     blip = Blip(
                         source_url=revision.link,
                         title=resource_atom.title,
                         summary="%(title)s edited" % resource_atom,
                         timestamp=timestamp,
-                        who=revision.author,
+                        who=getattr(revision, 'author', resource_atom.author),
                     )
                     blips.append(blip)
         return blips
