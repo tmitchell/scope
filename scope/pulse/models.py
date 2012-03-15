@@ -227,8 +227,17 @@ class GoogleDocsProvider(Provider):
         """If password is set, login and generate the auth token, then trash the password"""
         if self.password:
             from gdata.docs import service
+            from gdata.service import CaptchaRequired
             client = service.DocsService()
-            client.ClientLogin(self.email, self.password, source=self.application_name)
+
+            while True:
+                try:
+                    client.ClientLogin(self.email, self.password, source=self.application_name)
+                except CaptchaRequired:
+                  print 'Captcha required, please visit ' + client.captcha_url
+                  answer = raw_input('Answer to the challenge? ')
+                  client.ClientLogin(self.email, self.password, source=self.application_name,
+                                     captcha_token=client.captcha_token, captcha_response=answer)
 
             # store the auth token and remove the password
             self.auth_token = client.current_token.get_token_string()
@@ -240,12 +249,29 @@ class GoogleDocsProvider(Provider):
         assert self.auth_token, "auth_token must be set before we can fetch %s blips.  " \
                                 "Please set username and password via the admin" % self.__class__.__name__ \
 
+        import getpass
+
+        from gdata.client import Unauthorized
         from gdata.docs.client import DocsClient
         from gdata.gauth import ClientLoginToken
+        from gdata.service import BadAuthentication
 
         blips = []
         client = DocsClient(source=self.application_name, auth_token=ClientLoginToken(self.auth_token))
-        for resource in client.GetAllResources():
+
+        while True:
+            try:
+                resources = client.GetAllResources()
+            except (Unauthorized) as e:
+                print e
+                self.password = getpass.getpass("Update password: ")
+                try:
+                    self.save()
+                    break
+                except BadAuthentication as e:
+                    print e
+
+        for resource in resources:
             # convert the resource to something we can handle (e.g feedparser data)
             resource_atom = feedparser.parse(resource.ToString())
             assert len(resource_atom.entries) == 1, "We assume there is only one entry for each document currently"
