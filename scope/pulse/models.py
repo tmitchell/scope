@@ -223,21 +223,27 @@ class GoogleDocsProvider(Provider):
     # non-ORM fields, keeping it DRY
     application_name = 'exoanalytic-exoscope-v1'
 
-    def save(self, *args, **kwargs):
+    def save(self, console=False, *args, **kwargs):
         """If password is set, login and generate the auth token, then trash the password"""
         if self.password:
             from gdata.docs import service
             from gdata.service import CaptchaRequired
             client = service.DocsService()
 
+            captcha_token = None
+            captcha_response = None
             while True:
                 try:
-                    client.ClientLogin(self.email, self.password, source=self.application_name)
-                except CaptchaRequired:
-                  print 'Captcha required, please visit ' + client.captcha_url
-                  answer = raw_input('Answer to the challenge? ')
-                  client.ClientLogin(self.email, self.password, source=self.application_name,
-                                     captcha_token=client.captcha_token, captcha_response=answer)
+                    client.ClientLogin(self.email, self.password, source=self.application_name,
+                                       captcha_token=captcha_token, captcha_response=captcha_response)
+                    logger.debug("Google Docs login succeeded for %s" % self.email)
+                    break
+                except CaptchaRequired as e:
+                    if not console:
+                        raise e
+                    print 'Captcha required, please visit ' + client.captcha_url
+                    captcha_token = client.captcha_token
+                    captcha_response = raw_input('Answer to the challenge? ')
 
             # store the auth token and remove the password
             self.auth_token = client.current_token.get_token_string()
@@ -254,22 +260,24 @@ class GoogleDocsProvider(Provider):
         from gdata.client import Unauthorized
         from gdata.docs.client import DocsClient
         from gdata.gauth import ClientLoginToken
-        from gdata.service import BadAuthentication
 
         blips = []
-        client = DocsClient(source=self.application_name, auth_token=ClientLoginToken(self.auth_token))
 
         while True:
             try:
+                client = DocsClient(source=self.application_name, auth_token=ClientLoginToken(self.auth_token))
                 resources = client.GetAllResources()
-            except (Unauthorized) as e:
-                print e
-                self.password = getpass.getpass("Update password: ")
-                try:
-                    self.save()
-                    break
-                except BadAuthentication as e:
-                    print e
+                break
+            except Unauthorized as e:
+                msg = None
+                for m in ('Token expired', 'Token invalid'):
+                    if m in e.message:
+                        msg = m
+                if not msg:
+                    raise e
+                print "%s.  Please re-enter password for %s" % (msg, self.email)
+                self.password = getpass.getpass("Password: ")
+                self.save(console=True)
 
         for resource in resources:
             # convert the resource to something we can handle (e.g feedparser data)
