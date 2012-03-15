@@ -1,7 +1,10 @@
 import os
+import sys
 
 # calculated path for the site used as starting points for various other paths
 SITE_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+if not SITE_ROOT in sys.path:
+    sys.path.append(SITE_ROOT)
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
