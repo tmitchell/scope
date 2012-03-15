@@ -3,7 +3,7 @@
 South==0.7.3
 psycopg2==2.4.3
 wsgiref==0.1.2
-django-polymorphic==0.2
+django-model-utils==1.0.0
 feedparser==5.1
 pytz==2011n
 -e git+https://github.com/alex/django-filter.git@51b39fca089f2cb1d3d3501d2e164635fbe52864#egg=django_filter-dev

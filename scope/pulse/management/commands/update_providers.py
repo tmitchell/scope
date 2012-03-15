@@ -13,6 +13,6 @@ class Command(BaseCommand):
     args = ''
 
     def handle(self, *args, **options):
-        for p in Provider.objects.all():
+        for p in Provider.objects.all().select_subclasses():
             logger.debug("Updating %s %s..." % (p.__class__.__name__, p))
             p.update()
