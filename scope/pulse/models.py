@@ -256,14 +256,18 @@ class GoogleDocsProvider(Provider):
             for revision in revision_atom.entries:
                 timestamp = datetime.datetime.utcfromtimestamp(time.mktime(revision.updated_parsed))
                 if timestamp > self.last_update:
-                    blip = Blip(
-                        source_url=revision.link,
-                        title=resource_atom.title,
-                        summary="%(title)s edited" % resource_atom,
-                        timestamp=timestamp,
-                        who=getattr(revision, 'author', resource_atom.author),
-                    )
+                    import pdb
+                    pdb.set_trace()
+                    blip = Blip()
+                    #  some revisions don't have an author, use the document owner in that case
+                    blip.who = getattr(revision, 'author', resource_atom.author)
+                    blip.title = resource_atom.title,
+                    blip.summary="%(title)s edited" % resource_atom
+                    blip.source_url = resource_atom.link
+                    blip.timestamp = timestamp
+
                     blips.append(blip)
+
         return blips
 
 
