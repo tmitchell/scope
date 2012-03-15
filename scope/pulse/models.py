@@ -288,10 +288,9 @@ class GoogleDocsProvider(Provider):
             revision_feed = client.get_revisions(resource)
             revision_atom = feedparser.parse(revision_feed.ToString())
             for revision in revision_atom.entries:
-                timestamp = datetime.datetime.utcfromtimestamp(time.mktime(revision.updated_parsed))
+                timestamp = datetime.datetime.fromtimestamp(time.mktime(revision.updated_parsed)).replace(tzinfo=utc)
                 if timestamp > self.last_update:
-                    import pdb
-                    pdb.set_trace()
+                    #import pdb; pdb.set_trace()
                     blip = Blip()
                     #  some revisions don't have an author, use the document owner in that case
                     blip.who = getattr(revision, 'author', resource_atom.author)
