@@ -8,8 +8,9 @@ import feedparser
 from django.db import models
 from django.db.models import signals
 from django.utils.timezone import get_default_timezone, now, utc
-from model_utils.managers import InheritanceManager
 from taggit.managers import TaggableManager
+
+from polymorphic import PolymorphicModel
 
 
 logger = logging.getLogger(__name__)
@@ -72,14 +73,14 @@ class Blip(models.Model):
                 if not(m.group(1) is None):
                     self.tags.add(m.group(1))
 
-class Provider(models.Model):
+
+class Provider(PolymorphicModel):
     update_frequency = models.IntegerField(verbose_name='Update Rate (mins)')
     name = models.CharField(max_length=255, blank=True)
     last_update = models.DateTimeField(editable=False, default=datetime.datetime(year=1900, month=1, day=1, tzinfo=get_default_timezone()))
     summary_format = models.TextField(default=u"%(count)d new items fetched from %(source)s",
                                       help_text=u"String-formatting indices you can use are `count` and `source`")
     tags = TaggableManager()
-    objects = InheritanceManager()
 
     def __unicode__(self):
         return self.name
