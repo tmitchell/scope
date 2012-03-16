@@ -107,8 +107,9 @@ class TracTimelineProviderTest(TestCase):
     def setUp(self):
         self.provider = TracTimelineProvider.objects.create(
             update_frequency = 5,
-            url = posixpath.join("file://", os.path.dirname(__file__), "trac.xml")
+            url = posixpath.join("file://", os.path.dirname(__file__), "trac.xml"),
         )
+        self.provider.tags.add('trac')
         self.provider.update()
 
     def test_load_all(self):
@@ -121,16 +122,14 @@ class TracTimelineProviderTest(TestCase):
             '<Blip: Ticket #1702 Fix everything closed>',
         ])
 
-    def test_tags(self):
+    def test_blipset_tags(self):
+        bs = BlipSet.objects.get()
+        self.assertQuerysetEqual(bs.tags.all(), ['<Tag: trac>'])
+
+    def test_blip_tags(self):
         b = Blip.objects.get(pk=1)
-        self.assertQuerysetEqual(b.tags.all(), [
-            '<Tag: changeset>',
-        ])
+        self.assertQuerysetEqual(b.tags.all(), ['<Tag: changeset>',])
         b = Blip.objects.get(pk=5)
-        self.assertQuerysetEqual(b.tags.all(), [
-            '<Tag: wiki>',
-        ])
+        self.assertQuerysetEqual(b.tags.all(), ['<Tag: wiki>',])
         b = Blip.objects.get(pk=6)
-        self.assertQuerysetEqual(b.tags.all(), [
-            '<Tag: closedticket>',
-        ])
+        self.assertQuerysetEqual(b.tags.all(), ['<Tag: closedticket>',])
