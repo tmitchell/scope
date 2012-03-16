@@ -1,8 +1,9 @@
 from datetime import datetime
 
 from django.test import TestCase
+from django.utils.timezone import now
 
-from pulse.models import BlipSet, Provider
+from pulse.models import BlipSet, Provider, Blip
 
 
 class TimelineTest(TestCase):
@@ -28,6 +29,32 @@ class BlipSetTest(TestCase):
     def test_render(self):
         bs = BlipSet.objects.create(provider=self.provider)
         self.assertEqual(bs.__unicode__(), "Test 0 TestProvider")
+
+    def test_extract_tags(self):
+        wid_blip = Blip.objects.create(
+            title=u"What I'm up to",
+            summary=u"Joey Rocks #lie #truth?",
+            who=u"Joey",
+            timestamp=now(),
+        )
+        wid_blip.extract_tags()
+        wid_blip.save()
+
+        bs = BlipSet.objects.create(provider=self.provider)
+        bs.blips.add(wid_blip)
+        bs.save()
+
+        blip_from_db = Blip.objects.get(title=u"What I'm up to")
+        self.assertEqual(blip_from_db.tags.count(), 2)
+        tag_lie = False
+        tag_truth = False
+        for t in blip_from_db.tags.all():
+            if t.__unicode__() == u"lie":
+                tag_lie = True
+            elif t.__unicode__() == u"truth":
+                tag_truth = True
+        assert tag_lie
+        assert tag_truth
 
 
 class ProviderSignalTest(TestCase):
