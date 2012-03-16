@@ -1,4 +1,5 @@
 import os
+import posixpath
 from datetime import datetime
 
 from django.conf import settings
@@ -6,7 +7,10 @@ from django.test import TestCase
 from django.utils.timezone import now
 from pytz import timezone, utc
 
-from pulse.models import BlipSet, Provider, Blip, FileSystemChangeProvider
+from pulse.models import BlipSet, Provider, Blip, FileSystemChangeProvider, TracTimelineProvider
+
+
+TEST_DIR = os.path.dirname(__file__)
 
 
 class TimelineTest(TestCase):
@@ -78,7 +82,7 @@ class FileSystemChangeProviderTest(TestCase):
     def setUp(self):
         self.provider = FileSystemChangeProvider.objects.create(
             update_frequency = 5,
-            change_log_path = os.path.join(os.path.dirname(__file__), 'modify.log'),
+            change_log_path = os.path.join(TEST_DIR, 'modify.log'),
             source_url_root = '//data/',
         )
         self.provider.update()
@@ -98,3 +102,19 @@ class FileSystemChangeProviderTest(TestCase):
         b = Blip.objects.get(title='tmp has been created')
         self.assertEqual(b.timestamp, datetime(2011, 12, 17, 15, 57, 13, tzinfo=utc))
 
+
+class TracTimelineProviderTest(TestCase):
+    def setUp(self):
+        self.provider = TracTimelineProvider.objects.create(
+            update_frequency = 5,
+            url = posixpath.join("file://", os.path.dirname(__file__), "trac.xml")
+        )
+        self.provider.update()
+
+    def test_load_all(self):
+        self.assertQuerysetEqual(Blip.objects.all(), [
+            '<Blip: Changeset [5e5d4b6]: Did some stuff>',
+            '<Blip: Changeset [6b8bcb6]: Did more stuff>',
+            '<Blip: Changeset [bc5f099]: Did yet more stuff>',
+            '<Blip: Changeset [81d0551]: Did even more stuff>'
+        ])

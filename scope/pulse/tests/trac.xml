@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+  <channel>
+    <title>project</title>
+    <link>https://contoso.com/projects/project/timeline</link>
+    <description>Trac Timeline</description>
+    <language>en-US</language>
+    <generator>Trac 0.12.1</generator>
+    <image>
+      <title>project</title>
+      <url>https://contoso.com/projects/project/chrome/site/project.png</url>
+      <link>https://contoso.com/projects/project/timeline</link>
+    </image>
+    <item>
+      <title>Changeset [5e5d4b6]: Did some stuff</title>
+      
+        <dc:creator>John Doe &lt;jdoe@...&gt;</dc:creator>
+
+      <pubDate>Thu, 15 Mar 2012 01:59:56 GMT</pubDate>
+      <link>https://contoso.com/projects/project/changeset/5e5d4b6a04558398b553d0571e3746459db7b203</link>
+      <guid isPermaLink="false">https://contoso.com/projects/project/changeset/5e5d4b6a04558398b553d0571e3746459db7b203/1331776796000000</guid>
+      <description>Did some stuff</description>
+      <category>changeset</category>
+    </item><item>
+      <title>Changeset [6b8bcb6]: Did more stuff</title>
+      
+        <dc:creator>John Doe &lt;jdoe@...&gt;</dc:creator>
+
+      <pubDate>Thu, 15 Mar 2012 01:04:37 GMT</pubDate>
+      <link>https://contoso.com/projects/project/changeset/6b8bcb6e0af0ecd4e42cbe209080e098274832b7</link>
+      <guid isPermaLink="false">https://contoso.com/projects/project/changeset/6b8bcb6e0af0ecd4e42cbe209080e098274832b7/1331773477000000</guid>
+      <description>Did more stuff</description>
+      <category>changeset</category>
+    </item><item>
+      <title>Changeset [bc5f099]: Did yet more stuff</title>
+      
+        <dc:creator>John Doe &lt;jdoe@...&gt;</dc:creator>
+
+      <pubDate>Wed, 14 Mar 2012 09:22:27 GMT</pubDate>
+      <link>https://contoso.com/projects/project/changeset/bc5f099642992eb138dcb8822c0ae1e2696ac0d2</link>
+      <guid isPermaLink="false">https://contoso.com/projects/project/changeset/bc5f099642992eb138dcb8822c0ae1e2696ac0d2/1331716947000000</guid>
+      <description>Did yet more stuff</description>
+      <category>changeset</category>
+    </item><item>
+      <title>Changeset [81d0551]: Did even more stuff</title>
+      
+        <dc:creator>John Doe &lt;jdoe@...&gt;</dc:creator>
+
+      <pubDate>Wed, 14 Mar 2012 01:58:57 GMT</pubDate>
+      <link>https://contoso.com/projects/project/changeset/81d0551b0b10413dae4df09948f633757dedb8d4</link>
+      <guid isPermaLink="false">https://contoso.com/projects/project/changeset/81d0551b0b10413dae4df09948f633757dedb8d4/1331690337000000</guid>
+      <description>Did even more stuff</description>
+      <category>changeset</category>
+    </item>
+   </channel>
+</rss>
