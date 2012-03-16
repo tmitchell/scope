@@ -217,6 +217,9 @@ class FileSystemChangeProvider(Provider):
             (timestamp, path, action, filename) = line.strip().rsplit('|')
             # convert to more friendly types/formats
             timestamp = datetime.datetime.strptime(timestamp, "%H:%M:%S %d:%m:%Y").replace(tzinfo=utc)
+            is_dir = action[-6:] == ':ISDIR'
+            if is_dir:
+                action = action[:-6]
             if action == 'MOVED_FROM':
                 doing_move = filename
                 continue
@@ -235,7 +238,7 @@ class FileSystemChangeProvider(Provider):
             if timestamp > self.last_update:        # make sure we don't import events we've already gotten
                 blip = Blip(
                     source_url='%s%s' % (self.source_url_root, filename),
-                    title='%s has been %s' % (filename, action),
+                    title='%s%s has been %s' % ("Directory " if is_dir else "", filename, action),
                     timestamp=timestamp
                 )
                 blips.append(blip)

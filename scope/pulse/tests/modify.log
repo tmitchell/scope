@@ -5,3 +5,6 @@
 15:38:27 19:12:2011|/c/Administrative/some/path/|MOVED_TO|Briefing.ppt
 15:39:27 19:12:2011|/c/Administrative/some/path/|MOVED_FROM|Briefing.ppt
 15:39:27 19:12:2011|/c/Administrative/some/other/path/|MOVED_TO|Briefing.ppt
+09:44:01 12:03:2012|/c/Administrative/foo/|CREATE:ISDIR|New folder
+09:44:06 12:03:2012|/c/Administrative/foo/|MOVED_FROM:ISDIR|New folder
+09:44:06 12:03:2012|/c/Administrative/foo/|MOVED_TO:ISDIR|bar
