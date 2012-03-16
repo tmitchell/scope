@@ -1,0 +1,17 @@
+<p>
+
+</p>
+
+<p>
+{% if blip.summary %}
+    <i class="icon-comment"></i>
+    {{ blip.summary|safe }}
+    - <em>{{ blip.who }} @ {{ blip.timestamp|date:'H:i' }}</em>
+  {% if blip.tags.exists %}
+    {% for tag in blip.tags.all %}
+      <span class="label label"><a href="{% url blip_tags tag.slug %}">{{ tag }}</a></span>
+    {% endfor %}
+  {% endif %}
+{% endif %}
+<a href="{% url blip_detail blip.pk %}"><i class="icon-bookmark"></i>Link</a>
+</p>

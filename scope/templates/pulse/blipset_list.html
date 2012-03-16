@@ -28,8 +28,11 @@
                     {% if timestamp %}
                         <h2>{{ timestamp|date:"l, M d Y" }} .&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;.</h2>
                     {% endif %}
-                    {% include "pulse/includes/blip.txt" %}
-                    {{ blip.timestamp }}
+                    {% if blip.who %}
+                        {% include "pulse/includes/wid_blip.txt" %}
+                    {% else %}
+                        {% include "pulse/includes/blip.txt" %}
+                    {% endif %}
                 {% endwith %}
             {% else %}
                 {% get_daily_timestamp blipset.timestamp as timestamp %}
