@@ -113,8 +113,19 @@ class TracTimelineProviderTest(TestCase):
 
     def test_load_all(self):
         self.assertQuerysetEqual(Blip.objects.all(), [
+            '<Blip: WikiStart edited>',
             '<Blip: Changeset [5e5d4b6]: Did some stuff>',
             '<Blip: Changeset [6b8bcb6]: Did more stuff>',
             '<Blip: Changeset [bc5f099]: Did yet more stuff>',
             '<Blip: Changeset [81d0551]: Did even more stuff>'
+        ])
+
+    def test_tags(self):
+        b = Blip.objects.get(pk=1)
+        self.assertQuerysetEqual(b.tags.all(), [
+            '<Tag: changeset>',
+        ])
+        b = Blip.objects.get(pk=5)
+        self.assertQuerysetEqual(b.tags.all(), [
+            '<Tag: wiki>',
         ])

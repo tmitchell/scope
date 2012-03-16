@@ -52,5 +52,16 @@
       <description>Did even more stuff</description>
       <category>changeset</category>
     </item>
+      <item>
+        <title>WikiStart edited</title>
+
+              <dc:creator>Jim</dc:creator>
+
+            <pubDate>Fri, 16 Mar 2012 18:12:12 GMT</pubDate>
+            <link>https://contoso.com/projects/project/wiki/WikiStart?version=70</link>
+            <guid isPermaLink="false">https://contoso.com/projects/project/wiki/WikiStart?version=70/1331921532520264</guid>
+            <description> (&lt;a href="https://contoso.com/projects/project/wiki/WikiStart?action=diff&amp;amp;version=70"&gt;diff&lt;/a&gt;)</description>
+            <category>wiki</category>
+          </item>
    </channel>
 </rss>
