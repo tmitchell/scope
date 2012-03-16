@@ -22,12 +22,14 @@
           {% endif %}
 
           {% for blipset in object_list %}
+            {% get_daily_timestamp blipset.timestamp as timestamp %}
+            {% if timestamp %}
+                <h2>{{ timestamp|date:"l, M d Y" }} .&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;.</h2>
+            {% endif %}
+
             {% ifequal blipset.blips.count 1 %}
                 {% with blipset.blips.all|first as blip %}
-                    {% get_daily_timestamp blip.timestamp as timestamp %}
-                    {% if timestamp %}
-                        <h2>{{ timestamp|date:"l, M d Y" }} .&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;.</h2>
-                    {% endif %}
+                {% get_daily_timestamp blip.timestamp as timestamp %}
                     {% if blip.who %}
                         {% include "pulse/includes/wid_blip.txt" %}
                     {% else %}
@@ -35,10 +37,6 @@
                     {% endif %}
                 {% endwith %}
             {% else %}
-                {% get_daily_timestamp blipset.timestamp as timestamp %}
-                {% if timestamp %}
-                    <h2>{{ timestamp|date:"l, M d Y" }} .&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;.</h2>
-                {% endif %}
                 {% include "pulse/includes/blipset.txt" %}
             {% endifequal %}
           {% endfor %}
