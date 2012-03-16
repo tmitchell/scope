@@ -29,12 +29,8 @@
 
             {% ifequal blipset.blips.count 1 %}
                 {% with blipset.blips.all|first as blip %}
-                {% get_daily_timestamp blip.timestamp as timestamp %}
-                    {% if blip.who %}
-                        {% include "pulse/includes/wid_blip.txt" %}
-                    {% else %}
-                        {% include "pulse/includes/blip.txt" %}
-                    {% endif %}
+                    {% include "pulse/includes/blip.txt" %}
+                    {{ blip.timestamp }}
                 {% endwith %}
             {% else %}
                 {% include "pulse/includes/blipset.txt" %}
