@@ -1,0 +1,7 @@
+15:57:13 17:12:2011|/c/Administrative/|CREATE|tmp
+16:00:15 17:12:2011|/c/Administrative/|MODIFY|tmp
+15:58:01 17:12:2011|/c/Administrative/|DELETE|tmp
+15:38:27 19:12:2011|/c/Administrative/some/path/|MOVED_FROM|mvdC66B.tmp
+15:38:27 19:12:2011|/c/Administrative/some/path/|MOVED_TO|Briefing.ppt
+15:39:27 19:12:2011|/c/Administrative/some/path/|MOVED_FROM|Briefing.ppt
+15:39:27 19:12:2011|/c/Administrative/some/other/path/|MOVED_TO|Briefing.ppt

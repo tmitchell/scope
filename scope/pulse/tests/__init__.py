@@ -1,11 +1,12 @@
+import os
 from datetime import datetime
 
 from django.conf import settings
 from django.test import TestCase
 from django.utils.timezone import now
-from pytz import timezone
+from pytz import timezone, utc
 
-from pulse.models import BlipSet, Provider, Blip
+from pulse.models import BlipSet, Provider, Blip, FileSystemChangeProvider
 
 
 class TimelineTest(TestCase):
@@ -71,4 +72,27 @@ class ProviderSignalTest(TestCase):
         bs = BlipSet.objects.get()                  # retrieve again from DB
         self.assertIsNone(bs.provider)
         self.assertEqual(bs.__unicode__(), "Test 0 TestProvider")
+
+
+class FileSystemChangeProviderTest(TestCase):
+    def setUp(self):
+        self.provider = FileSystemChangeProvider.objects.create(
+            update_frequency = 5,
+            change_log_path = os.path.join(os.path.dirname(__file__), 'modify.log'),
+            source_url_root = '//data/',
+        )
+        self.provider.update()
+
+    def test_load_all(self):
+        self.assertQuerysetEqual(Blip.objects.all(), [
+            '<Blip: Briefing.ppt has been moved>',
+            '<Blip: Briefing.ppt has been renamed from mvdC66B.tmp to Briefing.ppt>',
+            '<Blip: tmp has been modified>',
+            '<Blip: tmp has been deleted>',
+            '<Blip: tmp has been created>',
+        ])
+
+    def test_timestamp(self):
+        b = Blip.objects.get(title='tmp has been created')
+        self.assertEqual(b.timestamp, datetime(2011, 12, 17, 15, 57, 13, tzinfo=utc))
 
