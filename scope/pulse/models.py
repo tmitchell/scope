@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class BlipSet(models.Model):
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
     tags = TaggableManager(blank=True)
     provider = models.ForeignKey('Provider', null=True, editable=False, on_delete=models.SET_NULL, related_name='blip_sets')
     summary = models.TextField(editable=False, null=True)
@@ -51,7 +51,7 @@ class Blip(models.Model):
     title = models.TextField()
     summary = models.TextField(null=True)
     who = models.CharField(max_length=255, null=True)
-    timestamp = models.DateTimeField()
+    timestamp = models.DateTimeField(db_index=True)
     tags = TaggableManager(blank=True)
     blipset = models.ForeignKey(BlipSet, related_name='blips', null=True)
     class Meta:
