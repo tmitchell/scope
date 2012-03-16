@@ -1,8 +1,6 @@
 <h3>
 <a href="{{ blip.source_url }}">{{ blip.title }}</a>
-{% if blip.who %}
-  by {{ blip.who }}
-{% endif %}
+{% if blip.who %} by {{ blip.who }} {% endif %}
 </h3>
 
 <p>
