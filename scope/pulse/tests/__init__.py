@@ -4,7 +4,7 @@ from datetime import datetime
 from django.conf import settings
 from django.test import TestCase
 from django.utils.timezone import now
-from pytz import timezone
+from pytz import timezone, utc
 
 from pulse.models import BlipSet, Provider, Blip, FileSystemChangeProvider
 
@@ -91,4 +91,8 @@ class FileSystemChangeProviderTest(TestCase):
             '<Blip: tmp has been deleted>',
             '<Blip: tmp has been created>',
         ])
+
+    def test_timestamp(self):
+        b = Blip.objects.get(title='tmp has been created')
+        self.assertEqual(b.timestamp, datetime(2011, 12, 17, 15, 57, 13, tzinfo=utc))
 
