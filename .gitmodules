@@ -1,6 +1,3 @@
-[submodule "cookbooks"]
-	path = cookbooks
-	url = git@github.com:exoanalytic/cookbooks.git
 [submodule "scope/static/bootstrap"]
 	path = scope/static/bootstrap
 	url = https://github.com/twitter/bootstrap.git
