@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from django import template
+from django.utils.timezone import get_current_timezone
 
 register = template.Library()
 
@@ -17,7 +18,7 @@ class GetDailyTimestampNode(template.Node):
         try:
             # reduce the timestamp to just year/month/date
             timestamp = self.timestamp.resolve(context)
-            ymd_timestamp = datetime(year=timestamp.year, month=timestamp.month, day=timestamp.day)
+            ymd_timestamp = timestamp.astimezone(get_current_timezone()).date()
             # see if the date we've gotten represents a new day for the timeline
             if self in context.render_context and ymd_timestamp >= context.render_context[self]:
                 return ''

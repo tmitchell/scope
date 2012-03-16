@@ -5,6 +5,7 @@ import time
 import feedparser
 from django.db import models
 from django.db.models import signals
+from django.utils.timezone import get_default_timezone, now, utc
 from taggit.managers import TaggableManager
 
 from polymorphic import PolymorphicModel
@@ -57,11 +58,15 @@ class Blip(models.Model):
     def __unicode__(self):
         return self.title
 
+    @models.permalink
+    def get_absolute_url(self):
+        return 'blip_detail', [str(self.pk)]
+
 
 class Provider(PolymorphicModel):
     update_frequency = models.IntegerField(verbose_name='Update Rate (mins)')
     name = models.CharField(max_length=255, blank=True)
-    last_update = models.DateTimeField(editable=False, default=datetime.datetime(year=1900, month=1, day=1))
+    last_update = models.DateTimeField(editable=False, default=datetime.datetime(year=1900, month=1, day=1, tzinfo=get_default_timezone()))
     summary_format = models.TextField(default=u"%(count)d new items fetched from %(source)s",
                                       help_text=u"String-formatting indices you can use are `count` and `source`")
     tags = TaggableManager()
@@ -75,7 +80,7 @@ class Provider(PolymorphicModel):
         Keeps track of update rates to ensure we don't pummel the end services.  Also handles tagging all blips
         that are created
         """
-        if (datetime.datetime.now() - self.last_update) < datetime.timedelta(minutes=self.update_frequency):
+        if (now() - self.last_update) < datetime.timedelta(minutes=self.update_frequency):
             logger.debug("Skipping update because we updated it recently")
             return
 
@@ -99,7 +104,7 @@ class Provider(PolymorphicModel):
 
         logger.debug(blipset)
 
-        self.last_update = datetime.datetime.now()
+        self.last_update = now()
         self.save()
 
     def _fetch_blips(self):
@@ -127,7 +132,7 @@ class RSSProvider(Provider):
 
     def _get_timestamp(self, entry):
         """Convert the given RSS entry timestamp into a Python datetime compatible with our DB"""
-        return datetime.datetime.fromtimestamp(time.mktime(entry.updated_parsed))
+        return datetime.datetime.fromtimestamp(time.mktime(entry.updated_parsed)).replace(tzinfo=utc)
 
     def _fetch_blips(self):
         blips = []
@@ -218,12 +223,27 @@ class GoogleDocsProvider(Provider):
     # non-ORM fields, keeping it DRY
     application_name = 'exoanalytic-exoscope-v1'
 
-    def save(self, *args, **kwargs):
+    def save(self, console=False, *args, **kwargs):
         """If password is set, login and generate the auth token, then trash the password"""
         if self.password:
             from gdata.docs import service
+            from gdata.service import CaptchaRequired
             client = service.DocsService()
-            client.ClientLogin(self.email, self.password, source=self.application_name)
+
+            captcha_token = None
+            captcha_response = None
+            while True:
+                try:
+                    client.ClientLogin(self.email, self.password, source=self.application_name,
+                                       captcha_token=captcha_token, captcha_response=captcha_response)
+                    logger.debug("Google Docs login succeeded for %s" % self.email)
+                    break
+                except CaptchaRequired as e:
+                    if not console:
+                        raise e
+                    print 'Captcha required, please visit ' + client.captcha_url
+                    captcha_token = client.captcha_token
+                    captcha_response = raw_input('Answer to the challenge? ')
 
             # store the auth token and remove the password
             self.auth_token = client.current_token.get_token_string()
@@ -235,12 +255,31 @@ class GoogleDocsProvider(Provider):
         assert self.auth_token, "auth_token must be set before we can fetch %s blips.  " \
                                 "Please set username and password via the admin" % self.__class__.__name__ \
 
+        import getpass
+
+        from gdata.client import Unauthorized
         from gdata.docs.client import DocsClient
         from gdata.gauth import ClientLoginToken
 
         blips = []
-        client = DocsClient(source=self.application_name, auth_token=ClientLoginToken(self.auth_token))
-        for resource in client.GetAllResources():
+
+        while True:
+            try:
+                client = DocsClient(source=self.application_name, auth_token=ClientLoginToken(self.auth_token))
+                resources = client.GetAllResources()
+                break
+            except Unauthorized as e:
+                msg = None
+                for m in ('Token expired', 'Token invalid'):
+                    if m in e.message:
+                        msg = m
+                if not msg:
+                    raise e
+                print "%s.  Please re-enter password for %s" % (msg, self.email)
+                self.password = getpass.getpass("Password: ")
+                self.save(console=True)
+
+        for resource in resources:
             # convert the resource to something we can handle (e.g feedparser data)
             resource_atom = feedparser.parse(resource.ToString())
             assert len(resource_atom.entries) == 1, "We assume there is only one entry for each document currently"
@@ -249,17 +288,19 @@ class GoogleDocsProvider(Provider):
             revision_feed = client.get_revisions(resource)
             revision_atom = feedparser.parse(revision_feed.ToString())
             for revision in revision_atom.entries:
-                # TODO: these are in UTC, so we'll be updating more than we should
-                timestamp = datetime.datetime.fromtimestamp(time.mktime(revision.updated_parsed))
+                timestamp = datetime.datetime.fromtimestamp(time.mktime(revision.updated_parsed)).replace(tzinfo=utc)
                 if timestamp > self.last_update:
-                    blip = Blip(
-                        source_url=revision.link,
-                        title=resource_atom.title,
-                        summary="%(title)s edited" % resource_atom,
-                        timestamp=timestamp,
-                        who=revision.author,
-                    )
+                    #import pdb; pdb.set_trace()
+                    blip = Blip()
+                    #  some revisions don't have an author, use the document owner in that case
+                    blip.who = getattr(revision, 'author', resource_atom.author)
+                    blip.title = resource_atom.title,
+                    blip.summary="%(title)s edited" % resource_atom
+                    blip.source_url = resource_atom.link
+                    blip.timestamp = timestamp
+
                     blips.append(blip)
+
         return blips
 
 
