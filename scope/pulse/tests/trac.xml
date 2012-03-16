@@ -63,5 +63,19 @@
             <description> (&lt;a href="https://contoso.com/projects/project/wiki/WikiStart?action=diff&amp;amp;version=70"&gt;diff&lt;/a&gt;)</description>
             <category>wiki</category>
           </item>
+      <item>
+            <title>Ticket #1702 Fix everything closed</title>
+
+              <dc:creator>Jim</dc:creator>
+
+            <pubDate>Mon, 12 Mar 2012 16:07:32 GMT</pubDate>
+            <link>https://contoso.com/projects/project/ticket/1702#comment:2</link>
+            <guid isPermaLink="false">https://contoso.com/projects/project/ticket/1702#comment:2/1331568452172158</guid>
+            <description>fixed: &lt;p&gt;
+      Fixed in &lt;a class="changeset" href="https://contoso.com/projects/project/changeset/386abe50d22e948e4a009c3b7e48b212d05ef283/IDE" title="Fix bug ..."&gt;[386abe50d22e948e4a009c3b7e48b212d05ef283/IDE]&lt;/a&gt;.
+      &lt;/p&gt;
+      </description>
+            <category>closedticket</category>
+          </item>
    </channel>
 </rss>
