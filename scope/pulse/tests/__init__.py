@@ -85,6 +85,8 @@ class FileSystemChangeProviderTest(TestCase):
 
     def test_load_all(self):
         self.assertQuerysetEqual(Blip.objects.all(), [
+            '<Blip: Directory bar has been renamed from New folder to bar>',
+            '<Blip: Directory New folder has been created>',
             '<Blip: Briefing.ppt has been moved>',
             '<Blip: Briefing.ppt has been renamed from mvdC66B.tmp to Briefing.ppt>',
             '<Blip: tmp has been modified>',
