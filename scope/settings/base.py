@@ -70,6 +70,7 @@ INSTALLED_APPS = (
     'bootstrap',
     'taggit',
     'taggit_templatetags',
+    'gunicorn',
     # our project
     'pulse',
 )

@@ -28,6 +28,7 @@ ssh==1.7.11
 littlechef==1.0.4
 paramiko==1.7.7.1
 simplejson==2.3.0
+gunicorn==0.14.1
 
 # Google Docs
 gdata==2.0.16

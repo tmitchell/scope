@@ -1,7 +1,9 @@
 from datetime import datetime
 
+from django.conf import settings
 from django.test import TestCase
 from django.utils.timezone import now
+from pytz import timezone
 
 from pulse.models import BlipSet, Provider, Blip
 
@@ -9,10 +11,10 @@ from pulse.models import BlipSet, Provider, Blip
 class TimelineTest(TestCase):
     def setUp(self):
         blipset1 = BlipSet.objects.create(summary="Test")
-        blipset1.timestamp = datetime(1900, 1, 1)
+        blipset1.timestamp = datetime(1900, 1, 1, tzinfo=timezone(settings.TIME_ZONE))
         blipset1.save()
         blipset2 = BlipSet.objects.create(summary="Test")
-        blipset2.timestamp = datetime(1900, 1, 2)
+        blipset2.timestamp = datetime(1900, 1, 2, tzinfo=timezone(settings.TIME_ZONE))
         blipset2.save()
 
     def test_timeline_date_display(self):
