@@ -26,7 +26,7 @@
                 {% with blipset.blips.all|first as blip %}
                     {% get_daily_timestamp blip.timestamp as timestamp %}
                     {% if timestamp %}
-                        <h2>{{ timestamp|date:"l, M d Y" }}</h2>
+                        <h2>{{ timestamp|date:"l, M d Y" }} .&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;.</h2>
                     {% endif %}
                     {% include "pulse/includes/blip.txt" %}
                     {{ blip.timestamp }}
@@ -34,7 +34,7 @@
             {% else %}
                 {% get_daily_timestamp blipset.timestamp as timestamp %}
                 {% if timestamp %}
-                    <h2>{{ timestamp|date:"l, M d Y" }}</h2>
+                    <h2>{{ timestamp|date:"l, M d Y" }} .&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;.</h2>
                 {% endif %}
                 {% include "pulse/includes/blipset.txt" %}
             {% endifequal %}
