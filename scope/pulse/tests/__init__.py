@@ -83,5 +83,12 @@ class FileSystemChangeProviderTest(TestCase):
         )
         self.provider.update()
 
-    def test(self):
-        pass
+    def test_load_all(self):
+        self.assertQuerysetEqual(Blip.objects.all(), [
+            '<Blip: mvdC66B.tmp has been moved from>',
+            '<Blip: Briefing.ppt has been moved to>',
+            '<Blip: tmp has been modified>',
+            '<Blip: tmp has been deleted>',
+            '<Blip: tmp has been created>',
+        ])
+
