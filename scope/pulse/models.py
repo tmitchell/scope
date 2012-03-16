@@ -1,5 +1,6 @@
 import datetime
 import logging
+import re
 import time
 
 import feedparser
@@ -60,6 +61,15 @@ class Blip(models.Model):
     @models.permalink
     def get_absolute_url(self):
         return 'blip_detail', [str(self.pk)]
+
+    def extract_tags(self):
+        """Extracts Twitter-style hashtags from summary"""
+        tokens = self.summary.split(' ')
+        for token in tokens:
+            m = re.search('#([a-zA-Z0-9]+)', token)
+            if not(m is None):
+                if not(m.group(1) is None):
+                    self.tags.add(m.group(1))
 
 class Provider(models.Model):
     update_frequency = models.IntegerField(verbose_name='Update Rate (mins)')

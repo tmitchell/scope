@@ -59,15 +59,19 @@ class Timeline(View, TemplateResponseMixin):
             who = blip_create_form.cleaned_data['who']
             summary = blip_create_form.cleaned_data['summary']
 
-            blipset = BlipSet.objects.create(
-                summary=u"Manual update from %s" % who
-            )
-            blipset.blips.create(
+            wid_blip = Blip.objects.create(
                 title=u"What I'm up to",
                 summary=summary,
                 who=who,
                 timestamp=now(),
             )
+            wid_blip.extract_tags()
+            wid_blip.save()
+
+            blipset = BlipSet.objects.create(
+                summary=u"Manual update from %s" % who
+            )
+            blipset.blips.add(wid_blip)
         else:
             self._context['blip_create_form'] = blip_create_form
 
