@@ -1,5 +1,6 @@
 import datetime
 import logging
+import os
 import re
 import time
 
@@ -208,13 +209,26 @@ class FileSystemChangeProvider(Provider):
     def _fetch_blips(self):
         blips = []
         input = open(self.change_log_path, "r")
+        doing_move = False
         for line in input.readlines():
             # extract the various bits from the log file, see Example line:
             #14:49:40 17:12:2011|/c/Administrative/|MODIFY|tmp
             (timestamp, path, action, filename) = line.strip().rsplit('|')
             # convert to more friendly types/formats
             timestamp = datetime.datetime.strptime(timestamp, "%H:%M:%S %d:%m:%Y").replace(tzinfo=utc)
-            action = self.verbify_dict[action]
+            if action == 'MOVED_FROM':
+                doing_move = os.path.join(path, filename)
+                continue
+            elif action == 'MOVED_TO':
+                if doing_move:
+                    action = 'moved from %s to %s' % (doing_move, os.path.join(path, filename))
+                    doing_move = False
+                else:
+                    raise RuntimeError("Moves out of order, how to handle?")
+            else:
+                action = self.verbify_dict[action]
+
+
             if timestamp > self.last_update:        # make sure we don't import events we've already gotten
                 blip = Blip(
                     source_url='%s%s' % (self.source_url_root, filename),
