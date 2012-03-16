@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from django.conf import settings
@@ -5,7 +6,7 @@ from django.test import TestCase
 from django.utils.timezone import now
 from pytz import timezone
 
-from pulse.models import BlipSet, Provider, Blip
+from pulse.models import BlipSet, Provider, Blip, FileSystemChangeProvider
 
 
 class TimelineTest(TestCase):
@@ -72,3 +73,15 @@ class ProviderSignalTest(TestCase):
         self.assertIsNone(bs.provider)
         self.assertEqual(bs.__unicode__(), "Test 0 TestProvider")
 
+
+class FileSystemChangeProviderTest(TestCase):
+    def setUp(self):
+        self.provider = FileSystemChangeProvider.objects.create(
+            update_frequency = 5,
+            change_log_path = os.path.join(os.path.dirname(__file__), 'modify.log'),
+            source_url_root = '//data/',
+        )
+        self.provider.update()
+
+    def test(self):
+        pass

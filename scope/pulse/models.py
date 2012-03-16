@@ -213,7 +213,7 @@ class FileSystemChangeProvider(Provider):
             #14:49:40 17:12:2011|/c/Administrative/|MODIFY|tmp
             (timestamp, path, action, filename) = line.strip().rsplit('|')
             # convert to more friendly types/formats
-            timestamp = datetime.datetime.strptime(timestamp, "%H:%M:%S %d:%m:%Y")
+            timestamp = datetime.datetime.strptime(timestamp, "%H:%M:%S %d:%m:%Y").replace(tzinfo=utc)
             action = self.verbify_dict[action]
             if timestamp > self.last_update:        # make sure we don't import events we've already gotten
                 blip = Blip(
